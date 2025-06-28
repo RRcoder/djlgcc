@@ -1,3 +1,13 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import *
+
+@admin.register(Provincias)
+class ProvinciasAdmin(admin.ModelAdmin):
+    list_display = ['id', 'codigo', 'nombre']
+
+
+@admin.register(TiposCliente)
+class TiposClienteAdmin(admin.ModelAdmin):
+    list_display = ['id', 'codigo', 'descripcion']
+

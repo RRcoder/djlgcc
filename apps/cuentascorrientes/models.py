@@ -1,5 +1,54 @@
 from django.db import models
 
+
+class TiposCliente(models.Model):
+    codigo                 = models.CharField(max_length=1)
+    descripcion            = models.CharField(max_length=50)
+
+class Provincias(models.Model):
+    codigo        = models.CharField(max_length=1)
+    nombre        = models.CharField(max_length=100)
+
+
+
+class Clientes(models.Model):
+    nombre                 = models.CharField(max_length=200)
+    domicilio_calle        = models.CharField(max_length=200)
+    domicilio_numero       = models.CharField(max_length=10)
+    domicilio_piso         = models.CharField(max_length=10)
+    domicilio_departamento = models.CharField(max_length=10) 
+    codigo_postal          = models.CharField(max_length=10) 
+    localidad              = models.CharField(max_length=200)
+    provincia              = models.ForeignKey('Provincias', on_delete=models.PROTECT, blank=True, null=True) 
+    telefono_fijo          = models.CharField(max_length=50)
+    telefono_celular       = models.CharField(max_length=10)
+    email                  = models.EmailField(blank=True, null=True) 
+    cuit                   = models.BigIntegerField() 
+    tipo                   = models.ForeignKey('TiposCliente', on_delete=models.PROTECT, blank=True, null=True) 
+    sucursal               = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT, blank=True, null=True)
+    activo                 = models.BooleanField() 
+    updated                = models.DateTimeField(auto_now=True)
+    created                = models.DateTimeField(auto_now_add=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 s="""
 describe remito21;
 +------------+---------------+------+-----+---------+----------------+
