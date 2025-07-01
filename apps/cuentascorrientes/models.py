@@ -32,11 +32,53 @@ class Clientes(models.Model):
 
 
 
+class Remitos(model.Models):
+    fecha          = models.DateField() 
+    punto_de_venta = models.IntegerField()
+    numero         = models.IntegerField()
+    cliente        = models.ForeignKey('Clientes', on_delete=models.PROTECT)
+    #lista          = models. 
+    bultos         = models.IntegerField()
+    pesoaprox      = models.DecimalField(max_digits=6, decimal_places=2) 
+    valoraprox     = models.DecimalField(max_digits=6, decimal_places=2) 
+    impreso        = models.BooleanField()
+    #estado         = models.
+    sucursal       = models.ForeignKey('Sucursales', on_delete=models.PROTECT)
+    #condvta        = models. 
+    #responsable    =
+    #transporte     =
+
+class RemitosDet(models.Model):
+    remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT)
+    #codrep          | varchar(20)   | YES  |     | NULL    |                |
+    descripcion      = models.CharField(max_length=60)
+    cantidad         = models.DecimalField(max_digits=7, decimal_places=2) 
+    importe_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    dtounit          = models.DecimalField(max_digits=6, decimal_places=2)
+    #nped      | int(11)       | YES  |     | NULL    |                |
 
 
-
-
-
+class ListaPrecios(models.Model):
+| marca     | varchar(2)    | YES  | MUL | NULL    |       |
+| codrep    | char(20)      | YES  |     | NULL    |       |
+| vlpublico | decimal(12,2) | YES  |     | NULL    |       |
+| coddescu  | varchar(4)    | YES  |     | NULL    |       |
+| envase    | int(11)       | YES  |     | NULL    |       |
+| desrep    | varchar(30)   | YES  |     | NULL    |       |
+| fbaja     | date          | YES  |     | NULL    |       |
+| codcambio | varchar(1)    | YES  |     | NULL    |       |
+| reemplazo | char(20)      | YES  |     | NULL    |       |
+| desreemp  | varchar(30)   | YES  |     | NULL    |       |
+| codiva    | varchar(1)    | YES  |     | NULL    |       |
+| codmargen | varchar(2)    | YES  |     | NULL    |       |
+| margen    | decimal(6,2)  | YES  |     | NULL    |       |
+| clasif    | varchar(3)    | YES  |     | NULL    |       |
+| iva       | decimal(6,2)  | YES  |     | NULL    |       |
+| vlconce   | decimal(12,2) | YES  |     | NULL    |       |
+| grupo     | varchar(3)    | YES  |     | NULL    |       |
+| basico    | varchar(8)    | YES  |     | NULL    |       |
+| factor    | int(11)       | YES  |     | NULL    |       |
+| moneda    | varchar(1)    | YES  |     | NULL    |       |
 
 
 
