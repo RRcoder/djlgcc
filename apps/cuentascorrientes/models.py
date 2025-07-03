@@ -32,7 +32,7 @@ class Clientes(models.Model):
 
 
 
-class Remitos(model.Models):
+class Remitos(models.Model):
     fecha          = models.DateField() 
     punto_de_venta = models.IntegerField()
     numero         = models.IntegerField()
@@ -43,7 +43,7 @@ class Remitos(model.Models):
     valoraprox     = models.DecimalField(max_digits=6, decimal_places=2) 
     impreso        = models.BooleanField()
     #estado         = models.
-    sucursal       = models.ForeignKey('Sucursales', on_delete=models.PROTECT)
+    sucursal       = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT)
     #condvta        = models. 
     #responsable    =
     #transporte     =
@@ -59,26 +59,12 @@ class RemitosDet(models.Model):
 
 
 class ListaPrecios(models.Model):
-| marca     | varchar(2)    | YES  | MUL | NULL    |       |
-| codrep    | char(20)      | YES  |     | NULL    |       |
-| vlpublico | decimal(12,2) | YES  |     | NULL    |       |
-| coddescu  | varchar(4)    | YES  |     | NULL    |       |
-| envase    | int(11)       | YES  |     | NULL    |       |
-| desrep    | varchar(30)   | YES  |     | NULL    |       |
-| fbaja     | date          | YES  |     | NULL    |       |
-| codcambio | varchar(1)    | YES  |     | NULL    |       |
-| reemplazo | char(20)      | YES  |     | NULL    |       |
-| desreemp  | varchar(30)   | YES  |     | NULL    |       |
-| codiva    | varchar(1)    | YES  |     | NULL    |       |
-| codmargen | varchar(2)    | YES  |     | NULL    |       |
-| margen    | decimal(6,2)  | YES  |     | NULL    |       |
-| clasif    | varchar(3)    | YES  |     | NULL    |       |
-| iva       | decimal(6,2)  | YES  |     | NULL    |       |
-| vlconce   | decimal(12,2) | YES  |     | NULL    |       |
-| grupo     | varchar(3)    | YES  |     | NULL    |       |
-| basico    | varchar(8)    | YES  |     | NULL    |       |
-| factor    | int(11)       | YES  |     | NULL    |       |
-| moneda    | varchar(1)    | YES  |     | NULL    |       |
+    codigo      = models.CharField(max_length=10)
+    descripcion = models.CharField(max_length=100)
+    precio      = models.DecimalField(max_digits=12, decimal_places=2)    
+    costo       = models.DecimalField(max_digits=12, decimal_places=2)    
+    updated     = models.DateTimeField(auto_now=True)
+    created     = models.DateTimeField(auto_now_add=True)
 
 
 
