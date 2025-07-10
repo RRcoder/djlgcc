@@ -1,28 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container-fluid">
-    <h2>Lista de Precios</h2>
+    <h2>Clientes</h2>
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
             <tr>
-                <th>Código</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Costo</th>
-                <th>Actualizado</th>
+                <th></th>
+                <th></th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for item in items %}
                 <tr>
-                    <td>{{ item.codigo }}</td>
-                    <td>{{ item.descripcion }}</td>
-                    <td>${{ item.precio }}</td>
-                    <td>${{ item.costo }}</td>
+                    <td>{{ item.nombre }}</td>
+                    <td>{{ item.domicilio_calle }}</td>
                     <td>{{ item.updated|date:"d/m/Y H:i" }}</td>
                     <td>
-                    <a href="{% url 'cuentascorrientes:lista_precios_edit' item.pk %}" class="btn btn-sm btn-primary">Editar</a>
+                    <a href="{% url 'cuentascorrientes:clientes_edit' item.pk %}" class="btn btn-sm btn-primary">Editar</a>
                     </td>
                 </tr>
             {% empty %}
@@ -32,7 +27,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{% url 'cuentascorrientes:crear_lista_precios' %}" class="btn btn-primary">Cargar nuevo</a>
+    <a href="{% url 'cuentascorrientes:clientes_add' %}" class="btn btn-primary">Cargar nuevo</a>
 </div>
 {% endblock %}
 
