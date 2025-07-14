@@ -2,7 +2,15 @@
 {% block content %}
 <div class="container-fluid">
     <h2>Lista de Precios</h2>
-    <table class="table table-bordered table-striped">
+
+    <div class="row mb-1">
+        <div class="col-10"></div>
+        <div class="col-2 text-end">
+            <a href="{% url 'cuentascorrientes:lista_precios_add' %}" class="btn btn-primary btn-sm">Cargar nuevo</a>
+        </div>
+    </div>
+
+    <table class="table table-bordered table-striped table-sm">
         <thead class="table-dark">
             <tr>
                 <th>Código</th>
@@ -32,7 +40,6 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{% url 'cuentascorrientes:crear_lista_precios' %}" class="btn btn-primary">Cargar nuevo</a>
 </div>
 {% endblock %}
 

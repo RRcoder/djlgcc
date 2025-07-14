@@ -5,31 +5,52 @@ class TiposCliente(models.Model):
     codigo                 = models.CharField(max_length=1)
     descripcion            = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"{self.codigo} - {self.descripcion}"
+
 class Provincias(models.Model):
     codigo        = models.CharField(max_length=1)
     nombre        = models.CharField(max_length=100)
 
+    def __str__(self):
+        return self.nombre
 
 
 class Clientes(models.Model):
     nombre                 = models.CharField(max_length=200)
     domicilio_calle        = models.CharField(max_length=200)
     domicilio_numero       = models.CharField(max_length=10)
-    domicilio_piso         = models.CharField(max_length=10)
-    domicilio_departamento = models.CharField(max_length=10) 
-    codigo_postal          = models.CharField(max_length=10) 
-    localidad              = models.CharField(max_length=200)
-    provincia              = models.ForeignKey('Provincias', on_delete=models.PROTECT, blank=True, null=True) 
-    telefono_fijo          = models.CharField(max_length=50)
-    telefono_celular       = models.CharField(max_length=10)
+    domicilio_piso         = models.CharField(max_length=10, null=True, blank=True)
+    domicilio_departamento = models.CharField(max_length=10, null=True, blank=True) 
+    codigo_postal          = models.CharField(max_length=10, null=True, blank=True) 
+    localidad              = models.CharField(max_length=200, null=True, blank=True)
+    provincia              = models.ForeignKey('Provincias', on_delete=models.PROTECT) 
+    telefono_fijo          = models.CharField(max_length=50, null=True, blank=True)
+    telefono_celular       = models.CharField(max_length=10, null=True, blank=True)
     email                  = models.EmailField(blank=True, null=True) 
     cuit                   = models.BigIntegerField() 
-    tipo                   = models.ForeignKey('TiposCliente', on_delete=models.PROTECT, blank=True, null=True) 
+    tipo                   = models.ForeignKey('TiposCliente', on_delete=models.PROTECT) 
     sucursal               = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT, blank=True, null=True)
     activo                 = models.BooleanField() 
     updated                = models.DateTimeField(auto_now=True)
     created                = models.DateTimeField(auto_now_add=True)
 
+    def get_domicilio(self):
+        piso_dpto=''
+        if self.domicilio_piso is not None:
+            piso_dpto+= " Piso {}".format(self.domicilio_piso)
+        
+        if self.domicilio_departamento is not None:
+            piso_dpto+= " Dpto: {}".format(self.domicilio_departamento)
+
+        return "{} {} {}".format(self.domicilio_calle, self.domicilio_numero, piso_dpto)
+
+    def get_documento(self):
+        if self.tipo.codigo=='F':
+            return "DNI: {}".format(self.cuit)
+
+        if self.tipo.codigo=='J':
+            return "CUIT: {}".format(self.cuit)
 
 
 class Remitos(models.Model):

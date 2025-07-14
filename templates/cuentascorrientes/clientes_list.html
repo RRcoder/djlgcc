@@ -2,10 +2,22 @@
 {% block content %}
 <div class="container-fluid">
     <h2>Clientes</h2>
-    <table class="table table-bordered table-striped">
+
+    <div class="row mb-1">
+        <div class="col-10"></div>
+        <div class="col-2 text-end">
+            <a href="{% url 'cuentascorrientes:clientes_add' %}" class="btn btn-primary btn-sm">Cargar nuevo</a>
+        </div>
+    </div>
+    
+    <table class="table table-bordered table-striped table-sm">
         <thead class="table-dark">
             <tr>
-                <th></th>
+                <th>Tipo</th>
+                <th>Nombre</th>
+                <th>Domicilio</th>
+                <th>Documento</th>
+                <th>Telefono móvil</th>
                 <th></th>
                 <th>Acciones</th>
             </tr>
@@ -13,11 +25,24 @@
         <tbody>
             {% for item in items %}
                 <tr>
+                    <td>{{ item.tipo }}</td>
                     <td>{{ item.nombre }}</td>
-                    <td>{{ item.domicilio_calle }}</td>
+                    <td>{{ item.get_domicilio }}</td>
+                    <td>{{ item.get_documento }}</td>
+                    <td>{{ item.telefono_celular }}</td>
                     <td>{{ item.updated|date:"d/m/Y H:i" }}</td>
                     <td>
-                    <a href="{% url 'cuentascorrientes:clientes_edit' item.pk %}" class="btn btn-sm btn-primary">Editar</a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                Acciones
+                            </button>
+							<ul class="dropdown-menu">
+								<li>
+                        			<a class="dropdown-item" href="{% url 'cuentascorrientes:clientes_edit' item.pk %}" class="btn btn-sm btn-primary">Editar</a>
+								</li>
+								<li><a class="dropdown-item" href="#">Dropdown link</a></li>
+							</ul>
+                        </div>
                     </td>
                 </tr>
             {% empty %}
@@ -27,7 +52,6 @@
             {% endfor %}
         </tbody>
     </table>
-    <a href="{% url 'cuentascorrientes:clientes_add' %}" class="btn btn-primary">Cargar nuevo</a>
 </div>
 {% endblock %}
 

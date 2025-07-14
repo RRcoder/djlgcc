@@ -15,11 +15,25 @@ class ListaPreciosForm(forms.ModelForm):
 class ClientesForm(forms.ModelForm):
     class Meta:
         model = Clientes
-        fields = ['nombre', 'email', 'cuit']
+        fields = ['nombre', 'domicilio_calle', 'domicilio_numero', 'domicilio_piso', 'domicilio_departamento',
+        'codigo_postal', 'localidad', 'provincia', 'telefono_fijo', 'telefono_celular', 'email', 'cuit', 
+        'tipo' ]
         widgets = {
+        'tipo': forms.Select(attrs={'class': 'form-select'}),
         'nombre': forms.TextInput(attrs={'class': 'form-control'}),
         'email': forms.TextInput(attrs={'class': 'form-control'}),
         'cuit': forms.NumberInput(attrs={'class': 'form-control'}),
+        'domicilio_calle': forms.TextInput(attrs={'class':'form-control'}),
+        'domicilio_numero': forms.TextInput(attrs={'class':'form-control'}),
+        'domicilio_piso': forms.TextInput(attrs={'class':'form-control'}),
+        'domicilio_departamento': forms.TextInput(attrs={'class':'form-control'}),
+        'codigo_postal': forms.TextInput(attrs={'class':'form-control'}),
+        'localidad': forms.TextInput(attrs={'class':'form-control'}),
+        'provincia': forms.Select(attrs={'class': 'form-select'}),
+        'telefono_fijo': forms.TextInput(attrs={'class':'form-control'}),
+        'telefono_celular': forms.TextInput(attrs={'class':'form-control'}),
+        'email': forms.TextInput(attrs={'class':'form-control'}),
+        'cuit': forms.TextInput(attrs={'class':'form-control'}),
         }
 
 

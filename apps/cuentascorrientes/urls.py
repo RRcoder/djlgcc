@@ -8,7 +8,7 @@ app_name="cuentascorrientes"
 urlpatterns = [
     path('lista_precios_list', ListaPreciosListView.as_view(), name='lista_precios_list'),
     path('lista_precios_edit/<int:pk>/', ListaPreciosUpdateView.as_view(), name='lista_precios_edit'),
-    path('cargar/', ListaPreciosCreateView.as_view(), name='crear_lista_precios'),
+    path('cargar/', ListaPreciosCreateView.as_view(), name='lista_precios_add'),
     path('ok/', TemplateView.as_view(template_name='ok.html'), name='lista_precios_ok'),
     path('accion_ok/<str:titulo>', AccionOk, name='accion_ok'),
 

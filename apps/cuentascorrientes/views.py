@@ -17,14 +17,14 @@ class ListaPreciosListView(ListView):
 class ListaPreciosCreateView(CreateView):
     model = ListaPrecios
     form_class = ListaPreciosForm
-    template_name = 'cuentascorrientes/crear_lista_precios.html'
+    template_name = 'cuentascorrientes/lista_precios_add.html'
     success_url = reverse_lazy('cuentascorrientes:accion_ok', kwargs={'titulo':"Alta Producto en Lista de precios OK"})
 
 
 class ListaPreciosUpdateView(UpdateView):
     model = ListaPrecios
     form_class = ListaPreciosForm
-    template_name = 'cuentascorrientes/editar_lista_precios.html'
+    template_name = 'cuentascorrientes/lista_precios_edit.html'
     success_url = reverse_lazy('cuentascorrientes:lista_precios_list')  # Redirige al listado después de guardar
 
 def AccionOk(request, titulo):
@@ -42,6 +42,9 @@ class ClientesCreateView(CreateView):
     template_name = 'cuentascorrientes/clientes_add.html'
     success_url = reverse_lazy('cuentascorrientes:accion_ok', kwargs={'titulo':"Alta Cliente OK"})
 
+    def form_valid(self, form):
+        form.instance.activo = True  # valor por defecto oculto
+        return super().form_valid(form)
 
 class ClientesUpdateView(UpdateView):
     model = Clientes
