@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.empresa',
     'apps.cuentascorrientes',
+    'apps.members',
 ]
 
 MIDDLEWARE = [
@@ -138,6 +139,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+# rutas para login y logout
+LOGIN_URL = '/members/login_usuarios'
+LOGIN_REDIRECT_URL = '/members/login_usuarios'
+LOGOUT_REDIRECT_URL = '/members/logout'
 
 
 

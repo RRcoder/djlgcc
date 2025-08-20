@@ -5,9 +5,9 @@ from django.views.generic import ListView, UpdateView
 from django.urls import reverse_lazy
 from .models import ListaPrecios, Clientes
 from .forms import ListaPreciosForm, ClientesForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-
-class ListaPreciosListView(ListView):
+class ListaPreciosListView(LoginRequiredMixin, ListView):
     model = ListaPrecios
     template_name = 'lista_precios_list.html'  # Ruta al template
     context_object_name = 'items'  # Nombre del objeto en el template
@@ -51,4 +51,12 @@ class ClientesUpdateView(UpdateView):
     form_class = ClientesForm
     template_name = 'cuentascorrientes/clientes_edit.html'
     success_url = reverse_lazy('cuentascorrientes:clientes_list')
+
+
+def inicio(request):
+
+    context={}
+    return render(request, 'inicio.html', context  )
+
+
 
