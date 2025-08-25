@@ -18,6 +18,8 @@
                 <th>Domicilio</th>
                 <th>Documento</th>
                 <th>Telefono móvil</th>
+                <th>CtaCte</th>
+                <th>Credito</th>
                 <th></th>
                 <th>Acciones</th>
             </tr>
@@ -29,7 +31,9 @@
                     <td>{{ item.nombre }}</td>
                     <td>{{ item.get_domicilio }}</td>
                     <td>{{ item.get_documento }}</td>
-                    <td>{{ item.telefono_celular }}</td>
+                    <td>{{ item.telefono_celular|default_if_none:"" }}</td>
+                    <td>{{ item.estadoctacte.descripcion }}</td>
+                    <td>{{ item.credito|default_if_none:"" }}</td>
                     <td>{{ item.updated|date:"d/m/Y H:i" }}</td>
                     <td>
                         <div class="btn-group">
@@ -40,7 +44,8 @@
 								<li>
                         			<a class="dropdown-item" href="{% url 'cuentascorrientes:clientes_edit' item.pk %}" class="btn btn-sm btn-primary">Editar</a>
 								</li>
-								<li><a class="dropdown-item" href="#">Dropdown link</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cuentascorrientes:ctacte' item.pk %}">Activar Cuenta corriente</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cuentascorrientes:ctacte_bloquear' item.pk %}">Bloquear Cuenta corriente</a></li>
 							</ul>
                         </div>
                     </td>

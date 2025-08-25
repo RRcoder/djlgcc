@@ -2,8 +2,7 @@
 {% block content %}
 <div class="container-fluid">
 
-
-    <h2>Nuevo Cliente</h2>
+    <h2>Modificar Cliente</h2>
     <form method="post" novalidate>
         {% csrf_token %}
             <div class="col-md-6 mb-3">
@@ -121,7 +120,7 @@
 {{ form.activo.as_hidden }}
 
 
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
         <a href="{% url 'cuentascorrientes:clientes_list' %}" class="btn btn-secondary">Cancelar</a>
     </form>
 

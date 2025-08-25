@@ -1,10 +1,10 @@
 from django.shortcuts import render
 
 from django.views.generic.edit import CreateView
-from django.views.generic import ListView, UpdateView
+from django.views.generic import ListView, UpdateView, FormView
 from django.urls import reverse_lazy
 from .models import ListaPrecios, Clientes
-from .forms import ListaPreciosForm, ClientesForm
+from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 class ListaPreciosListView(LoginRequiredMixin, ListView):
@@ -57,6 +57,45 @@ def inicio(request):
 
     context={}
     return render(request, 'inicio.html', context  )
+
+class CtaCteFormView(UpdateView):
+    model = Clientes
+    template_name="cuentascorrientes/ctacte_form.html"
+    form_class = CtaCteForm
+    success_url = reverse_lazy('cuentascorrientes:clientes_list') 
+
+    def form_valid(self, form):
+        print(form)
+        self.object=form.save(commit=False) # crea un objeto del modelo con los datos del form sin guardar para q luego podamos modificarlo y guarda lo que querramos.
+        self.object.estadoctacte_id=1
+        self.object.save()
+        return super().form_valid(form)
+
+class CtaCteBlockFormView(UpdateView):
+    model = Clientes
+    template_name="cuentascorrientes/ctacteblock_form.html"
+    form_class = CtaCteBlockForm
+    success_url = reverse_lazy('cuentascorrientes:clientes_list') 
+
+    def form_valid(self, form):
+        from datetime import date
+        print(form)
+        self.object=form.save(commit=False) # crea un objeto del modelo con los datos del form sin guardar para q luego podamos modificarlo y guarda lo que querramos.
+        self.object.estadoctacte_id=2
+        self.object.febaja=  date.today()
+        self.object.save()
+        return super().form_valid(form)
+
+
+
+
+
+
+
+
+
+
+
 
 
 

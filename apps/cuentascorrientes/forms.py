@@ -36,7 +36,20 @@ class ClientesForm(forms.ModelForm):
         'cuit': forms.TextInput(attrs={'class':'form-control'}),
         }
 
+class CtaCteForm(forms.ModelForm):
+    estado_ctacte= forms.CharField(disabled=True, required=False)
 
+    class Meta:
+        model = Clientes
+        fields = ['credito' ]
+        
+class CtaCteBlockForm(forms.ModelForm):
+    estado_ctacte = forms.CharField(disabled=True, required=False)
+    febaja        = forms.DateField(disabled=True, required=False)
+
+    class Meta:
+        model = Clientes
+        fields = ['motivobaja' ]
 
 
 

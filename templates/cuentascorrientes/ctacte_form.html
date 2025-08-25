@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+
+    <h2>Activar Cuenta Corriente</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.credito.id_for_label }}" class="form-label">Crédito</label>
+                {{ form.credito }}
+                {% for error in form.credito.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+{{ form.sucursal.as_hidden }}
+{{ form.activo.as_hidden }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <a href="{% url 'cuentascorrientes:clientes_list' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+{% endblock %}
+

@@ -34,6 +34,12 @@ class Clientes(models.Model):
     activo                 = models.BooleanField() 
     updated                = models.DateTimeField(auto_now=True)
     created                = models.DateTimeField(auto_now_add=True)
+    
+    estadoctacte     = models.ForeignKey('Estadoscc', on_delete=models.PROTECT, null=True, blank=True)
+    tolerancia = models.IntegerField(null=True, blank= True)
+    credito    = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  
+    febaja     = models.DateField(null=True, blank=True) 
+    motivobaja = models.CharField(max_length=250, null=True, blank=True)
 
     def get_domicilio(self):
         piso_dpto=''
@@ -87,11 +93,24 @@ class ListaPrecios(models.Model):
     updated     = models.DateTimeField(auto_now=True)
     created     = models.DateTimeField(auto_now_add=True)
 
+# en vez de hacer en otra tabla se metio los campos en la clientes
+#class Ctacte(models.Model):
+    #cliente    = models.OnetoOneFeild('Clientes', on_delete=models.PROTECT)
+    #estado     = models.ForeignKey('Clientes', on_delete=models.PROTECT)
+    #moroso     =
+    #tolerancia = models.IntegerField(null=True, blank= True)
+    #credito    = models.DecimalField(max_digits=12, decimal_places=2)  
+    #febaja     = models.DateField(null=True, blank=True) 
+    #motivobaja = models.CharField(max_length=250, null=True, blank=True)
+    #updated    = models.DateTimeField(auto_now=True)
+    #created    = models.DateTimeField(auto_now_add=True)
 
+class Estadoscc(models.Model):
+    codigo                 = models.CharField(max_length=1)
+    descripcion            = models.CharField(max_length=50)
 
-
-
-
+    def __str__(self):
+        return f"{self.codigo} - {self.descripcion}"
 
 
 
@@ -259,6 +278,64 @@ email
 cuit 
 IIBB
 Inicio act
+
+
+mysql> describe cctacte;
++--------------+---------------+------+-----+---------+-------+
+| Field        | Type          | Null | Key | Default | Extra |
++--------------+---------------+------+-----+---------+-------+
+| cliente      | int(11)       | YES  |     | NULL    |       |
+| nrocta       | int(11)       | YES  | MUL | NULL    |       |
+| sucursal     | int(11)       | YES  |     | NULL    |       |
+| categ        | int(11)       | YES  |     | NULL    |       |
+| estado       | varchar(1)    | YES  |     | NULL    |       |
+| moroso       | varchar(1)    | YES  |     | NULL    |       |
+| tolerancia   | int(11)       | YES  |     | NULL    |       |
+| credito      | decimal(12,2) | YES  |     | NULL    |       |
+| saldo        | decimal(12,2) | YES  |     | NULL    |       |
+| fealta       | date          | YES  |     | NULL    |       |
+| febaja       | date          | YES  |     | NULL    |       |
+| fecredito    | date          | YES  |     | NULL    |       |
+| feultoper    | date          | YES  |     | NULL    |       |
+| feultpago    | date          | YES  |     | NULL    |       |
+| condvta      | int(11)       | YES  |     | NULL    |       |
+| motivobaja   | varchar(20)   | YES  |     | NULL    |       |
+| concep       | int(11)       | YES  |     | NULL    |       |
+| intcont      | int(11)       | YES  |     | NULL    |       |
+| notificacion | char(1)       | YES  |     | N       |       |
+| fe_arch      | date          | YES  |     | NULL    |       |
+| envia_resu   | char(1)       | YES  |     | NULL    |       |
++--------------+---------------+------+-----+---------+-------+
+21 rows in set (0.01 sec)
+
+mysql> select * from cctacte limit 1000,1;
++---------+--------+----------+-------+--------+--------+------------+---------+--------+------------+------------+------------+------------+------------+---------+----------------------+--------+---------+--------------+------------+------------+
+| cliente | nrocta | sucursal | categ | estado | moroso | tolerancia | credito | saldo  | fealta     | febaja     | fecredito  | feultoper  | feultpago  | condvta | motivobaja           | concep | intcont | notificacion | fe_arch    | envia_resu |
++---------+--------+----------+-------+--------+--------+------------+---------+--------+------------+------------+------------+------------+------------+---------+----------------------+--------+---------+--------------+------------+------------+
+|    9488 |      2 |        0 |     4 | B      |        |         30 | 1000.00 | 948.88 | 2000-07-12 | 2011-09-12 | 2000-07-12 | 2009-06-19 | 2009-05-12 |       0 |                      |      0 |       0 | N            | 2016-10-16 | NULL       |
++---------+--------+----------+-------+--------+--------+------------+---------+--------+------------+------------+------------+------------+------------+---------+----------------------+--------+---------+--------------+------------+------------+
+1 row in set (0.08 sec)
+mysql> select * from cctacte where cliente=7721;
++---------+--------+----------+-------+--------+--------+------------+-------------+----------+------------+------------+------------+------------+------------+---------+------------+--------+---------+--------------+------------+------------+
+| cliente | nrocta | sucursal | categ | estado | moroso | tolerancia | credito     | saldo    | fealta     | febaja     | fecredito  | feultoper  | feultpago  | condvta | motivobaja | concep | intcont | notificacion | fe_arch    | envia_resu |
++---------+--------+----------+-------+--------+--------+------------+-------------+----------+------------+------------+------------+------------+------------+---------+------------+--------+---------+--------------+------------+------------+
+|    7721 |      2 |        0 |     1 | A      |        |          0 | 45000000.00 | 59888.67 | 1999-05-17 | 2017-07-14 | 1999-05-17 | 2009-06-22 | 2009-05-26 |       2 |            |      0 |       0 | N            | 2016-10-16 | S          |
++---------+--------+----------+-------+--------+--------+------------+-------------+----------+------------+------------+------------+------------+------------+---------+------------+--------+---------+--------------+------------+------------+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 """
