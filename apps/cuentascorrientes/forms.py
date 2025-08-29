@@ -53,3 +53,14 @@ class CtaCteBlockForm(forms.ModelForm):
 
 
 
+class EntregaMercaderiaForm(forms.Form):
+    cliente = forms.ModelChoiceField(queryset=Clientes.objects.all(), label="Selecciona un Cliente") 
+
+class EntregaMercaderiaDetForm(forms.Form):
+    producto = forms.ModelChoiceField(queryset=ListaPrecios.objects.all(), label="Seleccione producto") 
+    cantidad = forms.DecimalField() 
+
+
+
+
+

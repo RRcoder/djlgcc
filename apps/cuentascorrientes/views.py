@@ -4,7 +4,7 @@ from django.views.generic.edit import CreateView
 from django.views.generic import ListView, UpdateView, FormView
 from django.urls import reverse_lazy
 from .models import ListaPrecios, Clientes
-from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm
+from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 class ListaPreciosListView(LoginRequiredMixin, ListView):
@@ -87,7 +87,28 @@ class CtaCteBlockFormView(UpdateView):
         return super().form_valid(form)
 
 
+class EntregaMercaderiaFormView(FormView):
+    template_name = 'cuentascorrientes/entrega_mercaderia_form.html'
+    form_class = EntregaMercaderiaForm
+    success_url = reverse_lazy('cuentascorrientes:clientes_list') # URL donde redirigir después de éxito
 
+    def form_valid(self, form):
+        # Lógica para procesar el formulario y guardar los datos
+        titulo = form.cleaned_data['titulo']
+
+        return super().form_valid(form)
+
+class EntregaMercaderiaDetFormView(FormView):
+    template_name = 'cuentascorrientes/entrega_mercaderia_form.html'
+    form_class = EntregaMercaderiaDetForm
+    success_url = reverse_lazy('cuentascorrientes:entrega_mercaderia') # URL donde redirigir después de éxito
+
+    def form_valid(self, form):
+        # Lógica para procesar el formulario y guardar los datos
+        p = form.cleaned_data['producto']
+        cantidad = form.cleaned_data['cantidad']
+
+        return super().form_valid(form)
 
 
 

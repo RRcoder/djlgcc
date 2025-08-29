@@ -58,6 +58,8 @@ class Clientes(models.Model):
         if self.tipo.codigo=='J':
             return "CUIT: {}".format(self.cuit)
 
+    def __str__(self):
+        return "({}) {}".format(self.id, self.nombre)
 
 class Remitos(models.Model):
     fecha          = models.DateField() 
@@ -81,9 +83,27 @@ class RemitosDet(models.Model):
     descripcion      = models.CharField(max_length=60)
     cantidad         = models.DecimalField(max_digits=7, decimal_places=2) 
     importe_unitario = models.DecimalField(max_digits=12, decimal_places=2)
-    dtounit          = models.DecimalField(max_digits=6, decimal_places=2)
+    dtounit          = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    importe_iva      = models.DecimalField(max_digits=12, decimal_places=2, null= True, blank=True)
     #nped      | int(11)       | YES  |     | NULL    |                |
 
+
+class Pedido(models.Model):
+    fecha          = models.DateField() 
+    cliente        = models.ForeignKey('Clientes', on_delete=models.PROTECT)
+    sucursal       = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT)
+    codigo         = models.CharField(max_length=10)
+    descripcion    = models.CharField(max_length=100)
+    precio         = models.DecimalField(max_digits=12, decimal_places=2)    
+    costo          = models.DecimalField(max_digits=12, decimal_places=2)    
+    cantidad       = models.DecimalField(max_digits=12, decimal_places=2)    
+    alicuota_iva   = models.DecimalField(max_digits=5, decimal_places=2)    
+    updated     = models.DateTimeField(auto_now=True)
+    created     = models.DateTimeField(auto_now_add=True)
+ 
+class TiposIVA(models.Model):
+    codigo      = models.CharField(max_length=10)
+    alicuota_iva= models.DecimalField(max_digits=5, decimal_places=2)    
 
 class ListaPrecios(models.Model):
     codigo      = models.CharField(max_length=10)
@@ -93,6 +113,8 @@ class ListaPrecios(models.Model):
     updated     = models.DateTimeField(auto_now=True)
     created     = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return ("{} - {}".format(self.codigo, self.descripcion))
 # en vez de hacer en otra tabla se metio los campos en la clientes
 #class Ctacte(models.Model):
     #cliente    = models.OnetoOneFeild('Clientes', on_delete=models.PROTECT)
