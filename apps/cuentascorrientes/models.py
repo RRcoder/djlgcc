@@ -88,19 +88,26 @@ class RemitosDet(models.Model):
     #nped      | int(11)       | YES  |     | NULL    |                |
 
 
-class Pedido(models.Model):
-    fecha          = models.DateField() 
-    cliente        = models.ForeignKey('Clientes', on_delete=models.PROTECT)
-    sucursal       = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT)
-    codigo         = models.CharField(max_length=10)
-    descripcion    = models.CharField(max_length=100)
-    precio         = models.DecimalField(max_digits=12, decimal_places=2)    
-    costo          = models.DecimalField(max_digits=12, decimal_places=2)    
-    cantidad       = models.DecimalField(max_digits=12, decimal_places=2)    
-    alicuota_iva   = models.DecimalField(max_digits=5, decimal_places=2)    
+class Pedidos(models.Model):
+    fecha          = models.DateField(null=True, blank=True)
+    proceso        = models.ForeignKey('Procesos', on_delete=models.PROTECT)
+    cliente        = models.ForeignKey('Clientes', on_delete=models.PROTECT,null=True, blank=True)
+    sucursal       = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT, null=True, blank=True)
+    codigo         = models.CharField(max_length=10, null=True, blank=True)
+    descripcion    = models.CharField(max_length=100, null=True, blank=True)
+    precio         = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    costo          = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    cantidad       = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    alicuota_iva   = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)    
     updated     = models.DateTimeField(auto_now=True)
     created     = models.DateTimeField(auto_now_add=True)
- 
+
+class Procesos(models.Model):
+    nombre      = models.CharField(max_length=20, null=True, blank=True)
+    updated     = models.DateTimeField(auto_now=True)
+    created     = models.DateTimeField(auto_now_add=True)
+
+
 class TiposIVA(models.Model):
     codigo      = models.CharField(max_length=10)
     alicuota_iva= models.DecimalField(max_digits=5, decimal_places=2)    

@@ -2,7 +2,7 @@
 {% block content %}
 <div class="container-fluid">
 
-    <h2>Entrega Mercaderia</h2>
+    <h2>Entrega Mercaderia a {{ cliente }}</h2>
     
 
 
@@ -10,8 +10,10 @@
         Detalle a entregar
     </h3>
     
-    <form method="post">
+    <form method="post" novalidate>
         {% csrf_token %}
+            {{ form.proceso_id }}
+            {{ form.cliente_id }}
 
         <div class="row">
         <div class="col-md-3">
@@ -46,15 +48,46 @@
     <table class="table table-bordered table-striped table-sm">
         <thead class="table-dark">
             <tr>
-                <th></th>
-                <th></th>
-                <th></th>
+                <th>Codigo</th>
+                <th>Descripción</th>
+                <th>Cantidad Kg</th>
+                <th>Precio Unit</th>
+                <th>Importe</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
+            {% for r in datos_adic %}
+            <tr>
+                <td>{{ r.codigo }}</td>
+                <td>{{ r.descripcion }}</td>
+                <td>{{ r.cantidad }}</td>
+                <td>{{ r.precio }}</td>
+                <td>{{ r.total }}</td>
+                <td>Acciones</td>
+            </tr>
+            {% endfor%}
+
+            {% if datos_adic %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="text-right">TOTAL:</td>
+                <td>{{ totales.total }}</td>
+                <td></td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
+
+{% if datos_adic %}
+<form method="post" action="{% url 'cuentascorrientes:guardar_pedido' %}">
+    {% csrf_token %}
+    {{ form_extra.as_p }}
+    <button type="submit" class="btn btn-primary">Guardar Pedido</button>
+</form>
+{% endif %}
 
 
 </div>

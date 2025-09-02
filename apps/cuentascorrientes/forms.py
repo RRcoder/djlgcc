@@ -59,7 +59,11 @@ class EntregaMercaderiaForm(forms.Form):
 class EntregaMercaderiaDetForm(forms.Form):
     producto = forms.ModelChoiceField(queryset=ListaPrecios.objects.all(), label="Seleccione producto") 
     cantidad = forms.DecimalField() 
+    proceso_id = forms.CharField(widget=forms.HiddenInput(),  label="")
+    cliente_id = forms.CharField(widget=forms.HiddenInput(),  label="")
 
+class GuardarPedidoForm(forms.Form):
+    proceso_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
 
 
 

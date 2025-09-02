@@ -13,8 +13,8 @@
     <table class="table table-bordered table-striped table-sm">
         <thead class="table-dark">
             <tr>
-                <th>Tipo</th>
                 <th>Nombre</th>
+                <th>Tipo</th>
                 <th>Domicilio</th>
                 <th>Documento</th>
                 <th>Telefono móvil</th>
@@ -27,8 +27,8 @@
         <tbody>
             {% for item in items %}
                 <tr>
-                    <td>{{ item.tipo }}</td>
                     <td>{{ item.nombre }}</td>
+                    <td>{{ item.tipo }}</td>
                     <td>{{ item.get_domicilio }}</td>
                     <td>{{ item.get_documento }}</td>
                     <td>{{ item.telefono_celular|default_if_none:"" }}</td>
@@ -46,6 +46,7 @@
 								</li>
                                 <li><a class="dropdown-item" href="{% url 'cuentascorrientes:ctacte' item.pk %}">Activar Cuenta corriente</a></li>
                                 <li><a class="dropdown-item" href="{% url 'cuentascorrientes:ctacte_bloquear' item.pk %}">Bloquear Cuenta corriente</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cuentascorrientes:entrega_mercaderia' item.pk %}">Pedido</a></li>
 							</ul>
                         </div>
                     </td>
