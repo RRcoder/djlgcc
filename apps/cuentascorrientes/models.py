@@ -67,10 +67,10 @@ class Remitos(models.Model):
     numero         = models.IntegerField()
     cliente        = models.ForeignKey('Clientes', on_delete=models.PROTECT)
     #lista          = models. 
-    bultos         = models.IntegerField()
-    pesoaprox      = models.DecimalField(max_digits=6, decimal_places=2) 
-    valoraprox     = models.DecimalField(max_digits=6, decimal_places=2) 
-    impreso        = models.BooleanField()
+    bultos         = models.IntegerField(null=True, blank=True)
+    pesoaprox      = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True) 
+    valoraprox     = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True) 
+    impreso        = models.BooleanField(null=True, blank=True)
     #estado         = models.
     sucursal       = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT)
     #condvta        = models. 
@@ -80,27 +80,31 @@ class Remitos(models.Model):
 class RemitosDet(models.Model):
     remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT)
     #codrep          | varchar(20)   | YES  |     | NULL    |                |
+    codigo           = models.CharField(max_length=10, null=True, blank=True)
     descripcion      = models.CharField(max_length=60)
-    cantidad         = models.DecimalField(max_digits=7, decimal_places=2) 
     importe_unitario = models.DecimalField(max_digits=12, decimal_places=2)
+    costo            = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    cantidad         = models.DecimalField(max_digits=7, decimal_places=2) 
+    alicuota_iva     = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)    
     dtounit          = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     importe_iva      = models.DecimalField(max_digits=12, decimal_places=2, null= True, blank=True)
     #nped      | int(11)       | YES  |     | NULL    |                |
 
 
 class Pedidos(models.Model):
-    fecha          = models.DateField(null=True, blank=True)
-    proceso        = models.ForeignKey('Procesos', on_delete=models.PROTECT)
-    cliente        = models.ForeignKey('Clientes', on_delete=models.PROTECT,null=True, blank=True)
-    sucursal       = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT, null=True, blank=True)
-    codigo         = models.CharField(max_length=10, null=True, blank=True)
-    descripcion    = models.CharField(max_length=100, null=True, blank=True)
-    precio         = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
-    costo          = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
-    cantidad       = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
-    alicuota_iva   = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)    
-    updated     = models.DateTimeField(auto_now=True)
-    created     = models.DateTimeField(auto_now_add=True)
+    fecha        = models.DateField(null=True, blank=True)
+    proceso      = models.ForeignKey('Procesos', on_delete=models.PROTECT)
+    cliente      = models.ForeignKey('Clientes', on_delete=models.PROTECT,null=True, blank=True)
+    sucursal     = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT, null=True, blank=True)
+    codigo       = models.CharField(max_length=10, null=True, blank=True)
+    descripcion  = models.CharField(max_length=100, null=True, blank=True)
+    precio       = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    costo        = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    cantidad     = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    alicuota_iva = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)    
+    rm_realizado = models.IntegerField(null=True, blank=True) 
+    updated      = models.DateTimeField(auto_now=True)
+    created      = models.DateTimeField(auto_now_add=True)
 
 class Procesos(models.Model):
     nombre      = models.CharField(max_length=20, null=True, blank=True)

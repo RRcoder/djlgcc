@@ -3,13 +3,19 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView, UpdateView, FormView
 from django.urls import reverse_lazy, reverse
-from .models import ListaPrecios, Clientes, Procesos, Pedidos
+from .models import ListaPrecios, Clientes, Procesos, Pedidos, Remitos, RemitosDet
+
+from apps.empresa.models import DatosUsuarios, Comprobantes
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
 from .forms import GuardarPedidoForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum
+from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max
 from django.db.models.functions import Round
 from django.views.decorators.http import require_POST
+
+from django.contrib.auth.decorators import login_required
+
+from datetime import date
 
 class ListaPreciosListView(LoginRequiredMixin, ListView):
     model = ListaPrecios
@@ -142,6 +148,8 @@ class EntregaMercaderiaDetFormView(FormView):
         context['cliente']= cliente
         context['datos_adic']= p
         context['totales']= totales
+        context['form_extra']= GuardarPedidoForm(initial={'proceso_id':proceso_id, 'cliente_id':cliente_id})
+
         print(p)
         print("====")
 
@@ -163,6 +171,7 @@ class EntregaMercaderiaDetFormView(FormView):
         ped.costo         = p.costo
         ped.cantidad      = form.cleaned_data['cantidad']
         #ped.alicuota_iva  = form.cleaned_data['']
+        ped.rm_realizado = 0
         ped.save()
 
         print("------------")
@@ -188,15 +197,78 @@ class EntregaMercaderiaDetFormView(FormView):
         return reverse_lazy('cuentascorrientes:entrega_mercaderia_con_proceso_id', kwargs={'proceso_id': self.proceso_id, 'cliente_id': self.cliente_id})
 
 
+@login_required
 @require_POST
 def guardar_pedido(request):
+    user = request.user
+
     form = GuardarPedidoForm(request.POST)
     if form.is_valid():
-        form.save()
-        return redirect('/exito-extra/')
+        print(form.cleaned_data['proceso_id'])
+        print(form.cleaned_data['cliente_id'])
+
+        #con los datos del usuario determino en que sucursal trabaja. un usuario no puede estar en dos sucursales.
+        # si se necesita que este en dos sucursales se crea otro usuario con acceso a esa otra sucursal y listo.
+        du = DatosUsuarios.objects.filter(usuario_id=user).first()
+        #print(du.sucursal.id)
+        datos_comprobante = Comprobantes.objects.filter(comprobante__nombre='RM').first()
+
+        print(datos_comprobante)
+        print('?'*30)
+
+        ultimo = Remitos.objects.aggregate(Max('numero'))['numero__max']
+        rm=Remitos()
+        rm.fecha=date.today()
+        rm.punto_de_venta=datos_comprobante.punto_de_venta
+        rm.numero= (ultimo or 0) + 1
+        rm.cliente_id=form.cleaned_data['cliente_id']
+        rm.sucursal_id= du.sucursal.id
+        rm.save()
+
+        pedidos = Pedidos.objects.filter(proceso_id = form.cleaned_data['proceso_id'])
+
+        detalles = [
+            RemitosDet(
+                remito          = rm,
+                codigo          = pedido.codigo,
+                descripcion     = pedido.descripcion,
+                importe_unitario= pedido.precio,
+                costo           = pedido.costo,
+                cantidad        = pedido.cantidad,
+                alicuota_iva    = pedido.alicuota_iva,
+                dtounit         = 0,
+                importe_iva     = 0
+            )
+            for pedido in pedidos
+        ]
+        
+        RemitosDet.objects.bulk_create(detalles)
+
+        pedidos.update(rm_realizado=1)
+
+
+        print("OKKKK")
+
+    else:
+        print("fuuuck")
+        print(form.errors)
 
 
 
 
 
+def resumen_de_cuenta(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+
+    movimientos = Remitos.objects.filter(cliente_id=3).order_by('fecha')
+
+    saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
+
+    contexto = {
+        'cliente': cliente,
+        'movimientos': movimientos,
+        'saldo': saldo
+    }
+
+    return render(request, 'resumen_cuenta.html', contexto)
 

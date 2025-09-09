@@ -64,6 +64,7 @@ class EntregaMercaderiaDetForm(forms.Form):
 
 class GuardarPedidoForm(forms.Form):
     proceso_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
+    cliente_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
 
 
 
