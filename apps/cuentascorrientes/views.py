@@ -13,6 +13,8 @@ from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max
 from django.db.models.functions import Round
 from django.views.decorators.http import require_POST
 
+from django.shortcuts import get_object_or_404
+
 from django.contrib.auth.decorators import login_required
 
 from datetime import date
@@ -257,18 +259,20 @@ def guardar_pedido(request):
 
 
 
-def resumen_de_cuenta(request, cliente_id):
-    cliente = get_object_or_404(Cliente, pk=cliente_id)
+def resumen_de_cuenta(request):
+    cliente_id=3
+    cliente = get_object_or_404(Clientes, pk=cliente_id)
 
-    movimientos = Remitos.objects.filter(cliente_id=3).order_by('fecha')
+    movimientos = RemitosDet.objects.filter(remito__cliente_id=3).values('remito_id').annotate(imptotal = Sum('importe_unitario')).order_by('remito__fecha')
 
-    saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
+    print(movimientos.query)
+    #saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
 
     contexto = {
         'cliente': cliente,
-        'movimientos': movimientos,
-        'saldo': saldo
+        'objects': movimientos,
+        #'saldo': saldo
     }
 
-    return render(request, 'resumen_cuenta.html', contexto)
+    return render(request, 'cuentascorrientes/resumen_de_cuenta.html', contexto)
 
