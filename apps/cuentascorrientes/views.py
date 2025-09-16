@@ -9,8 +9,8 @@ from apps.empresa.models import DatosUsuarios, Comprobantes
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
 from .forms import GuardarPedidoForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max
-from django.db.models.functions import Round
+from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField
+from django.db.models.functions import Round, Coalesce, Concat, Cast
 from django.views.decorators.http import require_POST
 
 from django.shortcuts import get_object_or_404
@@ -263,15 +263,40 @@ def resumen_de_cuenta(request):
     cliente_id=3
     cliente = get_object_or_404(Clientes, pk=cliente_id)
 
-    movimientos = RemitosDet.objects.filter(remito__cliente_id=3).values('remito_id').annotate(imptotal = Sum('importe_unitario')).order_by('remito__fecha')
-
+    #movimientos = RemitosDet.objects.filter(remito__cliente_id=3).values('remito_id').annotate(imptotal = Sum('importe_unitario')).order_by('remito__fecha')
+    movimientos = Remitos.objects.filter(cliente_id=3).annotate(
+        total=Sum(
+            ExpressionWrapper(
+                F('remitosdet__importe_unitario')  * F('remitosdet__cantidad'),
+                output_field=DecimalField(max_digits=14, decimal_places=2)
+            )
+        ),
+        comprobante=Concat(
+        Value('RM '),
+        Cast('punto_de_venta', CharField()),
+        Value('-'),
+        Cast('numero', CharField())
+    )
+    ).order_by('fecha','punto_de_venta', 'numero')
     print(movimientos.query)
     #saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
+
+    suma_total = Remitos.objects.filter(cliente_id=3).aggregate(
+        total_general=Sum(
+            ExpressionWrapper(
+                F('remitosdet__importe_unitario') * F('remitosdet__cantidad'),
+                output_field=DecimalField(max_digits=14, decimal_places=2)
+            )
+        )
+    )['total_general']
+
+
+
 
     contexto = {
         'cliente': cliente,
         'objects': movimientos,
-        #'saldo': saldo
+        'suma_total': suma_total
     }
 
     return render(request, 'cuentascorrientes/resumen_de_cuenta.html', contexto)
