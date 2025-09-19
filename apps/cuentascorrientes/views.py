@@ -259,7 +259,7 @@ def guardar_pedido(request):
 
 
 
-def resumen_de_cuenta(request):
+def listado_pedidos(request):
     cliente_id=3
     cliente = get_object_or_404(Clientes, pk=cliente_id)
 
@@ -299,5 +299,5 @@ def resumen_de_cuenta(request):
         'suma_total': suma_total
     }
 
-    return render(request, 'cuentascorrientes/resumen_de_cuenta.html', contexto)
+    return render(request, 'cuentascorrientes/listado_pedidos.html', contexto)
 

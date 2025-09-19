@@ -2,7 +2,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk
 from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, AccionOk, CtaCteFormView
-from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, resumen_de_cuenta
+from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos
 
 app_name="cuentascorrientes"
 
@@ -23,7 +23,7 @@ urlpatterns = [
 
     path('guardar_pedido', guardar_pedido, name='guardar_pedido'),
 
-    path('resumen_de_cuenta', resumen_de_cuenta, name='resumen_de_cuenta'),
+    path('listado_pedidos', listado_pedidos, name='listado_pedidos'),
 
 
 
