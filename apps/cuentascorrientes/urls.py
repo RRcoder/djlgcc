@@ -2,7 +2,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk
 from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, AccionOk, CtaCteFormView
-from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos
+from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form
 
 app_name="cuentascorrientes"
 
@@ -22,6 +22,8 @@ urlpatterns = [
     path('entregamercaderia_form/<int:cliente_id>/<int:proceso_id>', EntregaMercaderiaDetFormView.as_view(), name='entrega_mercaderia_con_proceso_id'),
 
     path('guardar_pedido', guardar_pedido, name='guardar_pedido'),
+
+    path('listado_pedidos_form/', listado_pedidos_form, name='listado_pedidos_form'),
 
     path('listado_pedidos', listado_pedidos, name='listado_pedidos'),
 

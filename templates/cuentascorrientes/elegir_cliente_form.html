@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+
+    <h2>Listado de Pedidos</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+
+                <button type="submit" class="btn btn-primary">Ver listado</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
+
+

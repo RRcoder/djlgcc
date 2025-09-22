@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container-fluid">
-    <h2>Resumen de Cuenta</h2>
+    <h2>Listado de Pedidos de {{ cliente.nombre }}</h2>
 
     <!--<table class="table table-bordered table-striped table-sm">-->
     <table class="table table-bordered table-sm">
@@ -19,7 +19,10 @@
                     <td>{{ r.fecha|date:'d/m/Y' }}</td>
                     <td>{{ r.comprobante }}</td>
                     <td class="text-end">{{ r.total }}</td>
-                    <td></td>
+                    <td>
+                    <a href="{% url 'cuentascorrientes:listado_pedidos_form' %}" class="btn btn-sm btn-primary">Imprimir</a>
+                    <a href="{% url 'cuentascorrientes:listado_pedidos_form' %}" class="btn btn-sm btn-primary">Cargar FC</a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>

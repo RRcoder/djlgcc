@@ -66,6 +66,8 @@ class GuardarPedidoForm(forms.Form):
     proceso_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
     cliente_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
 
+class ElegirClienteForm(forms.Form):
+    cliente = forms.ModelChoiceField(queryset=Clientes.objects.all(), label="Seleccione cliente") 
 
 
 
