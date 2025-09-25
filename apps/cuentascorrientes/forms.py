@@ -69,5 +69,43 @@ class GuardarPedidoForm(forms.Form):
 class ElegirClienteForm(forms.Form):
     cliente = forms.ModelChoiceField(queryset=Clientes.objects.all(), label="Seleccione cliente") 
 
+class IngresarComprobanteForm(forms.Form):
+    id_pedido = forms.IntegerField(widget=forms.HiddenInput())
+
+    TIPOS_COMPROBANTE = [
+        ('FC', 'Factura'),
+        ('ND', 'Nota de Débito'),
+        ('NC', 'Nota de Crédito'),
+    ]
+
+    FORMULARIOS = [
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+    ]
+
+
+    fecha = forms.DateField( label='Fecha del comprobante', widget=forms.DateInput(attrs={'type': 'date'}) )
+
+    tipo_comprobante = forms.ChoiceField( choices=TIPOS_COMPROBANTE, label='Tipo de Comprobante' )
+
+    formulario = forms.ChoiceField( choices=FORMULARIOS, label='Tipo (Letra)')
+
+    punto_venta = forms.IntegerField(label='Punto de Venta' )
+
+    numero_comprobante = forms.IntegerField(label='Nro de Comprobante')
+
+    importe = forms.DecimalField(
+        label='Importe',
+        max_digits=10,
+        decimal_places=2
+    )
+
+    iva = forms.DecimalField(
+        label='IVA',
+        max_digits=10,
+        decimal_places=2
+    )
+
 
 

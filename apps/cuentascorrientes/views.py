@@ -7,7 +7,7 @@ from .models import ListaPrecios, Clientes, Procesos, Pedidos, Remitos, RemitosD
 
 from apps.empresa.models import DatosUsuarios, Comprobantes
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
-from .forms import GuardarPedidoForm, ElegirClienteForm
+from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField
 from django.db.models.functions import Round, Coalesce, Concat, Cast
@@ -353,55 +353,56 @@ def listado_pedidos(request):
 
 def ingresar_pagos_form(request):
     if request.method == 'POST':
-        form = ElegirClienteForm(request.POST)
-        if form.is_valid():
-            c = form.cleaned_data['cliente']
-            cliente_id=c.id
-            cliente = get_object_or_404(Clientes, pk=cliente_id)
+        print('')
+        #form = ElegirClienteForm(request.POST)
+        #if form.is_valid():
+            #c = form.cleaned_data['cliente']
+            #cliente_id=c.id
+            #cliente = get_object_or_404(Clientes, pk=cliente_id)
 
-            #movimientos = RemitosDet.objects.filter(remito__cliente_id=3).values('remito_id').annotate(imptotal = Sum('importe_unitario')).order_by('remito__fecha')
-            movimientos = Remitos.objects.filter(cliente_id=cliente_id).annotate(
-                total=Sum(
-                    ExpressionWrapper(
-                        F('remitosdet__importe_unitario')  * F('remitosdet__cantidad'),
-                        output_field=DecimalField(max_digits=14, decimal_places=2)
-                    )
-                ),
-                comprobante=Concat(
-                Value('RM '),
-                Cast('punto_de_venta', CharField()),
-                Value('-'),
-                Cast('numero', CharField())
-            )
-            ).order_by('fecha','punto_de_venta', 'numero')
-            print(movimientos.query)
-            #saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
+            ##movimientos = RemitosDet.objects.filter(remito__cliente_id=3).values('remito_id').annotate(imptotal = Sum('importe_unitario')).order_by('remito__fecha')
+            #movimientos = Remitos.objects.filter(cliente_id=cliente_id).annotate(
+                #total=Sum(
+                    #ExpressionWrapper(
+                        #F('remitosdet__importe_unitario')  * F('remitosdet__cantidad'),
+                        #output_field=DecimalField(max_digits=14, decimal_places=2)
+                    #)
+                #),
+                #comprobante=Concat(
+                #Value('RM '),
+                #Cast('punto_de_venta', CharField()),
+                #Value('-'),
+                #Cast('numero', CharField())
+            #)
+            #).order_by('fecha','punto_de_venta', 'numero')
+            #print(movimientos.query)
+            ##saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
 
-            suma_total = Remitos.objects.filter(cliente_id=cliente_id).aggregate(
-                total_general=Sum(
-                    ExpressionWrapper(
-                        F('remitosdet__importe_unitario') * F('remitosdet__cantidad'),
-                        output_field=DecimalField(max_digits=14, decimal_places=2)
-                    )
-                )
-            )['total_general']
+            #suma_total = Remitos.objects.filter(cliente_id=cliente_id).aggregate(
+                #total_general=Sum(
+                    #ExpressionWrapper(
+                        #F('remitosdet__importe_unitario') * F('remitosdet__cantidad'),
+                        #output_field=DecimalField(max_digits=14, decimal_places=2)
+                    #)
+                #)
+            #)['total_general']
 
-            contexto = {
-                'cliente': cliente,
-                'objects': movimientos,
-                'suma_total': suma_total
-            }
+            #contexto = {
+                #'cliente': cliente,
+                #'objects': movimientos,
+                #'suma_total': suma_total
+            #}
 
-            return render(request, 'cuentascorrientes/listado_pedidos.html', contexto)
-
-
+            #return render(request, 'cuentascorrientes/listado_pedidos.html', contexto)
 
 
-            #return render(request, 'formulario_exito.html', {'nombre': nombre})
+
+
+            ##return render(request, 'formulario_exito.html', {'nombre': nombre})
     else:
-        form = ElegirClienteForm()
+        form = IngresarComprobanteForm()
     
-    return render(request, 'cuentascorrientes/elegir_cliente_form.html', {'form': form})
+    return render(request, 'cuentascorrientes/ingresar_comprobante_form.html', {'form': form})
 
 
 

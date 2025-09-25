@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+<form method="post">
+    {% csrf_token %}
+
+
+    <h2>Ingreso Comprobante</h2>
+
+
+    <!-- Campo oculto: ID -->
+    {{ form.id }}
+
+    <!-- Fecha con calendario -->
+    <div class="row">
+        <label class="col-sm-3 col-form-label" for="{{ form.fecha.id_for_label }}">Fecha del comprobante:</label>
+        <div class="col-sm-6">
+            {{ form.fecha }}
+        </div>
+    </div>
+
+    <!-- Tipo de comprobante (select) -->
+    <div class="row">
+        <label class="col-sm-3 col-form-label" for="{{ form.tipo_comprobante.id_for_label }}">Comprobante:</label>
+        <div class="col-sm-6">
+            {{ form.tipo_comprobante }}
+            {{ form.formulario }}
+            {{ form.punto_venta }}
+            {{ form.numero_comprobante }}
+        </div>
+    </div>
+
+    <!-- Importe -->
+    <div class="row">
+        <label class="col-sm-3 col-form-label"  for="{{ form.importe.id_for_label }}">Importe:</label>
+        <div class="col-sm-6">
+            {{ form.importe }}
+        </div>
+    </div>
+
+    <!-- IVA -->
+    <div class="row">
+        <label class="col-sm-3 col-form-label" for="{{ form.iva.id_for_label }}">IVA:</label>
+        <div class="col-sm-6">
+            {{ form.iva }}
+        </div>
+    </div>
+
+    <!-- Botón de envío -->
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <button type="submit" class="btn btn-primary">Guardar Comprobante</button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+
+
+

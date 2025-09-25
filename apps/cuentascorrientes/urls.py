@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk
 from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, AccionOk, CtaCteFormView
 from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form
+from .views import ingresar_pagos_form 
 
 app_name="cuentascorrientes"
 
@@ -27,6 +28,7 @@ urlpatterns = [
 
     path('listado_pedidos', listado_pedidos, name='listado_pedidos'),
 
+    path('ingresar_pagos_form/', ingresar_pagos_form, name='ingresar_pagos_form'),
 
 
     ]
