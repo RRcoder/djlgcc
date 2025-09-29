@@ -354,38 +354,13 @@ def listado_pedidos(request):
 def ingresar_pagos_form(request):
     if request.method == 'POST':
         print('')
-        #form = ElegirClienteForm(request.POST)
-        #if form.is_valid():
+        form = IngresarComprobanteForm(request.POST)
+        if not form.is_valid():
+            print('eerror en el form')
+            print(form.errors)
+        else:
             #c = form.cleaned_data['cliente']
-            #cliente_id=c.id
-            #cliente = get_object_or_404(Clientes, pk=cliente_id)
-
-            ##movimientos = RemitosDet.objects.filter(remito__cliente_id=3).values('remito_id').annotate(imptotal = Sum('importe_unitario')).order_by('remito__fecha')
-            #movimientos = Remitos.objects.filter(cliente_id=cliente_id).annotate(
-                #total=Sum(
-                    #ExpressionWrapper(
-                        #F('remitosdet__importe_unitario')  * F('remitosdet__cantidad'),
-                        #output_field=DecimalField(max_digits=14, decimal_places=2)
-                    #)
-                #),
-                #comprobante=Concat(
-                #Value('RM '),
-                #Cast('punto_de_venta', CharField()),
-                #Value('-'),
-                #Cast('numero', CharField())
-            #)
-            #).order_by('fecha','punto_de_venta', 'numero')
-            #print(movimientos.query)
-            ##saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
-
-            #suma_total = Remitos.objects.filter(cliente_id=cliente_id).aggregate(
-                #total_general=Sum(
-                    #ExpressionWrapper(
-                        #F('remitosdet__importe_unitario') * F('remitosdet__cantidad'),
-                        #output_field=DecimalField(max_digits=14, decimal_places=2)
-                    #)
-                #)
-            #)['total_general']
+            print(form.cleaned_data)
 
             #contexto = {
                 #'cliente': cliente,
@@ -400,9 +375,8 @@ def ingresar_pagos_form(request):
 
             ##return render(request, 'formulario_exito.html', {'nombre': nombre})
     else:
-        form = IngresarComprobanteForm()
-    
-    return render(request, 'cuentascorrientes/ingresar_comprobante_form.html', {'form': form})
+        form = IngresarComprobanteForm(initial={'id_pedido':13})
+        return render(request, 'cuentascorrientes/ingresar_comprobante_form.html', {'form': form})
 
 
 

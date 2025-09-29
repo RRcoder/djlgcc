@@ -86,26 +86,12 @@ class IngresarComprobanteForm(forms.Form):
 
 
     fecha = forms.DateField( label='Fecha del comprobante', widget=forms.DateInput(attrs={'type': 'date'}) )
-
     tipo_comprobante = forms.ChoiceField( choices=TIPOS_COMPROBANTE, label='Tipo de Comprobante' )
-
     formulario = forms.ChoiceField( choices=FORMULARIOS, label='Tipo (Letra)')
-
     punto_venta = forms.IntegerField(label='Punto de Venta' )
-
     numero_comprobante = forms.IntegerField(label='Nro de Comprobante')
-
-    importe = forms.DecimalField(
-        label='Importe',
-        max_digits=10,
-        decimal_places=2
-    )
-
-    iva = forms.DecimalField(
-        label='IVA',
-        max_digits=10,
-        decimal_places=2
-    )
+    importe_total = forms.DecimalField( label='Importe', max_digits=12, decimal_places=2)
+    #iva = forms.DecimalField( label='IVA', max_digits=10, decimal_places=2    )
 
 
 

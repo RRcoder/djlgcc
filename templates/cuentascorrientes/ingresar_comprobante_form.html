@@ -9,7 +9,7 @@
 
 
     <!-- Campo oculto: ID -->
-    {{ form.id }}
+    {{ form.id_pedido }}
 
     <!-- Fecha con calendario -->
     <div class="row">
@@ -32,17 +32,9 @@
 
     <!-- Importe -->
     <div class="row">
-        <label class="col-sm-3 col-form-label"  for="{{ form.importe.id_for_label }}">Importe:</label>
+        <label class="col-sm-3 col-form-label"  for="{{ form.importe_total.id_for_label }}">Importe Total:</label>
         <div class="col-sm-6">
-            {{ form.importe }}
-        </div>
-    </div>
-
-    <!-- IVA -->
-    <div class="row">
-        <label class="col-sm-3 col-form-label" for="{{ form.iva.id_for_label }}">IVA:</label>
-        <div class="col-sm-6">
-            {{ form.iva }}
+            {{ form.importe_total }}
         </div>
     </div>
 
