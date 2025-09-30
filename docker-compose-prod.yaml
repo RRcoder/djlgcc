@@ -1,0 +1,27 @@
+version: "2"
+services:
+  lgcaja:
+    build: .
+    container_name: lgcaja
+    image: lgcaja:1.0
+    environment:
+      - DJANGO_SETTINGS_MODULE=lgcaja.settings
+      - DEV=1
+      - PYTHONUNBUFFERED=1
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=flash
+      - MYSQL_HOST=mysqlserver
+      - TZ=America/Argentina/Buenos_Aires
+    ports:
+      - 8002:8002
+    volumes:
+      - ./:/app
+    command: python manage.py runserver 0.0.0.0:8002
+    #command: tail -f /dev/null
+    networks:
+      - red_docker
+
+networks:
+    red_docker:
+        external: true
+
