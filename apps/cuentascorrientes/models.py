@@ -53,11 +53,12 @@ class Clientes(models.Model):
         return "{} {} {}".format(self.domicilio_calle, self.domicilio_numero, piso_dpto)
 
     def get_documento(self):
-        if self.tipo.codigo=='F':
-            return "DNI: {}".format(self.cuit)
+        #if self.tipo.codigo=='F':
+            #return "DNI: {}".format(self.cuit)
 
-        if self.tipo.codigo=='J':
-            return "CUIT: {}".format(self.cuit)
+        #if self.tipo.codigo=='J':
+            #return "CUIT: {}".format(self.cuit)
+        return "{}: {}".format(self.tipo_documento.codigo, self.cuit)
 
     def __str__(self):
         return "({}) {}".format(self.id, self.nombre)
@@ -169,6 +170,7 @@ class Movimientos(models.Model):
 class TiposDocumento(models.Model):
     codigo      = models.CharField(max_length=4, null=True, blank=True)
     descripcion = models.CharField(max_length=50, null=True, blank=True)
+    
 
 
 s="""

@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView, UpdateView, FormView
 from django.urls import reverse_lazy, reverse
-from .models import ListaPrecios, Clientes, Procesos, Pedidos, Remitos, RemitosDet
+from .models import ListaPrecios, Clientes, Procesos, Pedidos, Remitos, RemitosDet, TiposDocumento
 
 from apps.empresa.models import DatosUsuarios, Comprobantes
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
@@ -56,6 +56,14 @@ class ClientesCreateView(CreateView):
 
     def form_valid(self, form):
         form.instance.activo = True  # valor por defecto oculto
+        #print(form.cleaned_data)
+        if form.cleaned_data.get('tipo').codigo =='F':
+            td=TiposDocumento.objects.get(codigo='DNI')
+            form.instance.tipo_documento=td
+        else:
+            td=TiposDocumento.objects.get(codigo='CUIT')
+            form.instance.tipo_documento=td
+
         return super().form_valid(form)
 
 class ClientesUpdateView(UpdateView):
