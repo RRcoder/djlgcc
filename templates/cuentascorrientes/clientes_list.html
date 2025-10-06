@@ -46,8 +46,10 @@
 								</li>
                                 <li><a class="dropdown-item" href="{% url 'cuentascorrientes:ctacte' item.pk %}">Activar Cuenta corriente</a></li>
                                 <li><a class="dropdown-item" href="{% url 'cuentascorrientes:ctacte_bloquear' item.pk %}">Bloquear Cuenta corriente</a></li>
-                                <li><a class="dropdown-item" href="{% url 'cuentascorrientes:entrega_mercaderia' item.pk %}">Pedido</a></li>
-							</ul>
+                                <li><a class="dropdown-item" href="{% url 'cuentascorrientes:entrega_mercaderia' item.pk %}">Crear Pedido</a></li>
+                                <li><a class="dropdown-item" href="{% url 'cuentascorrientes:listado_pedidos_pendientes_clie' %}?cliente_id={{ item.pk }}">Ver pedidos pend.</a></li>
+
+                            </ul>
                         </div>
                     </td>
                 </tr>

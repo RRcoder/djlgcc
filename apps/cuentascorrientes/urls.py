@@ -3,7 +3,11 @@ from django.views.generic import TemplateView
 from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk
 from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, AccionOk, CtaCteFormView
 from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form
-from .views import ingresar_pagos_form 
+from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes
+
+from .views import listado_pedidos_entregados, detalle_pedido
+
+from .views import ingresar_pagos_form, entregar_pedido 
 
 app_name="cuentascorrientes"
 
@@ -23,12 +27,33 @@ urlpatterns = [
     path('entregamercaderia_form/<int:cliente_id>/<int:proceso_id>', EntregaMercaderiaDetFormView.as_view(), name='entrega_mercaderia_con_proceso_id'),
 
     path('guardar_pedido', guardar_pedido, name='guardar_pedido'),
+    
+    path('listado_pedidos_pendientes_form/', listado_pedidos_pendientes_form, name='listado_pedidos_pendientes_form'),
+    path('listado_pedidos_pendientes_clie/', listado_pedidos_pendientes_form, name='listado_pedidos_pendientes_clie'),
 
+    path('listado_pedidos_pendientes', listado_pedidos_pendientes, name='listado_pedidos_pendientes'),
+    
+
+
+    path('listado_pedidos_entregados', listado_pedidos_entregados, name='listado_pedidos_entregados'),
     path('listado_pedidos_form/', listado_pedidos_form, name='listado_pedidos_form'),
 
+    path('ingresar_pagos_form/', ingresar_pagos_form, name='ingresar_pagos_form'),
+
+    path('entregar_pedido/<int:pedido_id>', entregar_pedido, name='entregar_pedido'),
+
+    path('detalle_pedido/<int:pk>', detalle_pedido, name='detalle_pedido'),
+
+
+
+
+
+    # Listado de testeo
     path('listado_pedidos', listado_pedidos, name='listado_pedidos'),
 
-    path('ingresar_pagos_form/', ingresar_pagos_form, name='ingresar_pagos_form'),
+
+
+
 
 
     ]

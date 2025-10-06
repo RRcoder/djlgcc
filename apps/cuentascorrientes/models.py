@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class TiposCliente(models.Model):
@@ -78,6 +79,9 @@ class Remitos(models.Model):
     #condvta        = models. 
     #responsable    =
     #transporte     =
+    
+    def __str__(self):
+        return "RM {} - {}".format(self.punto_de_venta, self.numero)
 
 class RemitosDet(models.Model):
     remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT)
@@ -93,7 +97,7 @@ class RemitosDet(models.Model):
     #nped      | int(11)       | YES  |     | NULL    |                |
 
 
-class Pedidos(models.Model):
+class PedidosTmp(models.Model):
     fecha        = models.DateField(null=True, blank=True)
     proceso      = models.ForeignKey('Procesos', on_delete=models.PROTECT)
     cliente      = models.ForeignKey('Clientes', on_delete=models.PROTECT,null=True, blank=True)
@@ -112,6 +116,39 @@ class Procesos(models.Model):
     nombre      = models.CharField(max_length=20, null=True, blank=True)
     updated     = models.DateTimeField(auto_now=True)
     created     = models.DateTimeField(auto_now_add=True)
+
+
+class Pedidos(models.Model):
+    fecha        = models.DateField(null=True, blank=True)
+    cliente      = models.ForeignKey('Clientes', on_delete=models.PROTECT,null=True, blank=True)
+    sucursal     = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT, null=True, blank=True)
+    rm_realizado = models.IntegerField(null=True, blank=True) 
+    estado       = models.ForeignKey('Estadosped', on_delete=models.PROTECT, null=True, blank=True)
+    rm_asociado  = models.ForeignKey('Remitos', on_delete=models.PROTECT,null=True, blank=True)
+    usuario      = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    updated      = models.DateTimeField(auto_now=True)
+    created      = models.DateTimeField(auto_now_add=True)
+
+class PedidosDet(models.Model):
+    pedido           = models.ForeignKey('Pedidos', on_delete=models.CASCADE, related_name='detalles')
+    codigo           = models.CharField(max_length=10, null=True, blank=True)
+    descripcion      = models.CharField(max_length=100, null=True, blank=True)
+    importe_unitario = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    costo            = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+    cantidad         = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
+
+
+
+
+class Estadosped(models.Model):
+    codigo                 = models.CharField(max_length=1)
+    descripcion            = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.codigo} - {self.descripcion}"
+
+
+
 
 
 class TiposIVA(models.Model):

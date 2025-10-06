@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+
+<h1>Detalle del Pedido #{{ pedido.id }}</h1>
+
+<p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
+<p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+<p><strong>Sucursal:</strong> {{ pedido.sucursal }}</p>
+<p><strong>Estado:</strong> {{ pedido.estado }}</p>
+<p><strong>Usuario:</strong> {{ pedido.usuario }}</p>
+<p><strong>Remito Asociado:</strong> {{ pedido.rm_asociado }}</p>
+
+<hr>
+
+<h2>Ítems del Pedido</h2>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Importe Unitario</th>
+            <th>Costo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in detalles %}
+        <tr>
+            <td>{{ item.codigo }}</td>
+            <td>{{ item.descripcion }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>{{ item.importe_unitario }}</td>
+            <td>{{ item.costo }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+{% endblock %}
+

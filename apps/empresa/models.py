@@ -13,7 +13,7 @@ class Sucursales(models.Model):
         return "id {} - {}".format(self.id, self.nombre)
 
 class DatosUsuarios(models.Model):
-    usuario  = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    usuario  = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="datos_usuario")
     sucursal = models.ForeignKey('Sucursales', on_delete=models.PROTECT)
 
 class Comprobantes(models.Model):

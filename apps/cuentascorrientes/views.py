@@ -3,16 +3,18 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView, UpdateView, FormView
 from django.urls import reverse_lazy, reverse
-from .models import ListaPrecios, Clientes, Procesos, Pedidos, Remitos, RemitosDet, TiposDocumento
+from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet
 
 from apps.empresa.models import DatosUsuarios, Comprobantes
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
 from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField
+from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField, Count
 from django.db.models.functions import Round, Coalesce, Concat, Cast
 from django.views.decorators.http import require_POST
 
+from django.db import transaction
+from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 
 from django.contrib.auth.decorators import login_required
@@ -142,12 +144,12 @@ class EntregaMercaderiaDetFormView(FormView):
         print(proceso_id)
         cliente_id = self.kwargs.get('cliente_id')  # Si el parámetro viene por la URL
             
-        p = Pedidos.objects.filter(proceso_id=proceso_id).annotate(
+        p = PedidosTmp.objects.filter(proceso_id=proceso_id).annotate(
         total=ExpressionWrapper(Func(F('precio') * F('cantidad'), 2, function='round'),
         output_field=DecimalField(max_digits=12, decimal_places=2))
         )
 
-        totales = Pedidos.objects.filter(proceso_id=proceso_id).aggregate(total=Sum(
+        totales = PedidosTmp.objects.filter(proceso_id=proceso_id).aggregate(total=Sum(
         ExpressionWrapper(Func(F('precio') * F('cantidad'), 2, function='round'), output_field=DecimalField())
         ))
         #print(totales.query)
@@ -170,11 +172,16 @@ class EntregaMercaderiaDetFormView(FormView):
         p = form.cleaned_data['producto']
         cantidad = form.cleaned_data['cantidad']
 
-        ped = Pedidos(proceso_id=form.cleaned_data['proceso_id'])
+        ped = PedidosTmp(proceso_id=form.cleaned_data['proceso_id'])
 
-        #ped.fecha         = form.cleaned_data['']
-        #ped.cliente       = form.cleaned_data['']
-        #ped.sucursal      = form.cleaned_data['']
+        #print(form.cleaned_data)
+        user=self.request.user
+        datos_usuario = user.datos_usuario.get()
+
+        print( user)
+        ped.fecha         = date.today()
+        ped.cliente_id    = form.cleaned_data['cliente_id']
+        ped.sucursal      = datos_usuario.sucursal
         ped.codigo        = p.codigo
         ped.descripcion   = p.descripcion
         ped.precio        = p.precio
@@ -206,7 +213,7 @@ class EntregaMercaderiaDetFormView(FormView):
         print("==============")
         return reverse_lazy('cuentascorrientes:entrega_mercaderia_con_proceso_id', kwargs={'proceso_id': self.proceso_id, 'cliente_id': self.cliente_id})
 
-
+#==================================================================================================
 @login_required
 @require_POST
 def guardar_pedido(request):
@@ -217,52 +224,44 @@ def guardar_pedido(request):
         print(form.cleaned_data['proceso_id'])
         print(form.cleaned_data['cliente_id'])
 
-        #con los datos del usuario determino en que sucursal trabaja. un usuario no puede estar en dos sucursales.
-        # si se necesita que este en dos sucursales se crea otro usuario con acceso a esa otra sucursal y listo.
-        du = DatosUsuarios.objects.filter(usuario_id=user).first()
-        #print(du.sucursal.id)
-        datos_comprobante = Comprobantes.objects.filter(comprobante__nombre='RM').first()
+        # Creo un Pedido y un Detalle. Esto me va dar un numero de pedido que va estar en estado PENDIENTE
+        # Luego cuando creo el RM para a ENTREGADO
 
-        print(datos_comprobante)
-        print('?'*30)
+        pedidos = PedidosTmp.objects.filter(proceso_id = form.cleaned_data['proceso_id'])
+        
+        estado_pedido= Estadosped.objects.get(codigo='P')
 
-        ultimo = Remitos.objects.aggregate(Max('numero'))['numero__max']
-        rm=Remitos()
-        rm.fecha=date.today()
-        rm.punto_de_venta=datos_comprobante.punto_de_venta
-        rm.numero= (ultimo or 0) + 1
-        rm.cliente_id=form.cleaned_data['cliente_id']
-        rm.sucursal_id= du.sucursal.id
-        rm.save()
+        p = Pedidos.objects.create(
+            fecha = date.today(),
+            cliente_id = pedidos[0].cliente_id,
+            sucursal_id = pedidos[0].sucursal_id,
+            rm_realizado = 0,
+            estado = estado_pedido ,
+            usuario = user
+        )
 
-        pedidos = Pedidos.objects.filter(proceso_id = form.cleaned_data['proceso_id'])
+        print('====---')
+        print(p.id)
 
-        detalles = [
-            RemitosDet(
-                remito          = rm,
+        detalle_pedido = [
+            PedidosDet(
+                pedido_id       = p.id,
                 codigo          = pedido.codigo,
                 descripcion     = pedido.descripcion,
                 importe_unitario= pedido.precio,
                 costo           = pedido.costo,
                 cantidad        = pedido.cantidad,
-                alicuota_iva    = pedido.alicuota_iva,
-                dtounit         = 0,
-                importe_iva     = 0
             )
             for pedido in pedidos
         ]
-        
-        RemitosDet.objects.bulk_create(detalles)
+        PedidosDet.objects.bulk_create(detalle_pedido)
 
-        pedidos.update(rm_realizado=1)
-
-
-        print("OKKKK")
-
+        return redirect('cuentascorrientes:accion_ok', titulo='Pedido Registrado satisfactoriamente')
     else:
         print("fuuuck")
         print(form.errors)
 
+#==================================================================================================
 def listado_pedidos_form(request):
     if request.method == 'POST':
         form = ElegirClienteForm(request.POST)
@@ -306,18 +305,12 @@ def listado_pedidos_form(request):
 
             return render(request, 'cuentascorrientes/listado_pedidos.html', contexto)
 
-
-
-
             #return render(request, 'formulario_exito.html', {'nombre': nombre})
     else:
         form = ElegirClienteForm()
     
     return render(request, 'cuentascorrientes/elegir_cliente_form.html', {'form': form})
-
-
-
-
+#==================================================================================================
 def listado_pedidos(request):
     cliente_id=3
     cliente = get_object_or_404(Clientes, pk=cliente_id)
@@ -358,7 +351,6 @@ def listado_pedidos(request):
     return render(request, 'cuentascorrientes/listado_pedidos.html', contexto)
 
 #-----------------------------------------------------------------------------
-
 def ingresar_pagos_form(request):
     if request.method == 'POST':
         print('')
@@ -385,6 +377,197 @@ def ingresar_pagos_form(request):
     else:
         form = IngresarComprobanteForm(initial={'id_pedido':13})
         return render(request, 'cuentascorrientes/ingresar_comprobante_form.html', {'form': form})
+
+#==================================================================================================
+def listado_pedidos_pendientes_form(request):
+
+    cliente_id=None
+    
+    if request.method == 'POST':
+        form = ElegirClienteForm(request.POST)
+        if form.is_valid():
+            c = form.cleaned_data['cliente']
+            cliente_id=c.id
+            cliente = get_object_or_404(Clientes, pk=cliente_id)
+        else:
+            return render(request, 'cuentascorrientes/listado_pedidos_pendientes_clie.html', contexto)
+    else:
+        cliente_id = request.GET.get('cliente_id')
+
+    # Si tenemos un cliente válido (por GET o POST), mostramos sus pedidos
+    if cliente_id:
+
+        try:
+            cliente = Clientes.objects.get(id=cliente_id)
+        except Clientes.DoesNotExist:
+            return redirect('cuentascorrientes:accion_ok', titulo='Cliente no encontrado!')
+
+        movimientos = Pedidos.objects.filter(cliente_id=cliente_id, estado_id=1).annotate(
+            total_items=Count('detalles'),
+            total_kg=Sum('detalles__cantidad'),
+            total_importe=Sum(
+                F('detalles__cantidad') * F('detalles__importe_unitario'),
+                output_field=DecimalField()
+                )
+        )
+
+        contexto = {
+            'cliente': cliente,
+            'objects': movimientos,
+            'suma_total': 0
+        }
+
+        return render(request, 'cuentascorrientes/listado_pedidos_pendientes_clie.html', contexto)
+    else:
+        form = ElegirClienteForm()
+        return render(request, 'cuentascorrientes/elegir_cliente_form.html', {'form': form, 'titulo': "Listado de pedidos pendientes"})
+
+#==============================================================================
+def listado_pedidos_pendientes(request):
+    
+    movimientos = Pedidos.objects.filter(estado_id=1).annotate(
+        total_items=Count('detalles'),
+        total_kg=Sum('detalles__cantidad'),
+        total_importe=Sum(
+            F('detalles__cantidad') * F('detalles__importe_unitario'),
+            output_field=DecimalField()
+            )
+    )
+
+    #contexto = {
+        #'objects': movimientos,
+        #'suma_total': 0
+    #}
+    #movimientos = Remitos.objects.filter(cliente_id=cliente_id).annotate(
+        #total=Sum(
+            #ExpressionWrapper(
+                #F('remitosdet__importe_unitario')  * F('remitosdet__cantidad'),
+                #output_field=DecimalField(max_digits=14, decimal_places=2)
+            #)
+        #),
+        #comprobante=Concat(
+        #Value('RM '),
+        #Cast('punto_de_venta', CharField()),
+        #Value('-'),
+        #Cast('numero', CharField())
+    #)
+    #).order_by('fecha','punto_de_venta', 'numero')
+    #print(movimientos.query)
+    ##saldo = movimientos.aggregate(suma=Sum('monto'))['suma'] or 0
+
+    #suma_total = Remitos.objects.filter(cliente_id=cliente_id).aggregate(
+        #total_general=Sum(
+            #ExpressionWrapper(
+                #F('remitosdet__importe_unitario') * F('remitosdet__cantidad'),
+                #output_field=DecimalField(max_digits=14, decimal_places=2)
+            #)
+        #)
+    #)['total_general']
+
+    contexto = {
+        'objects': movimientos,
+    }
+
+    return render(request, 'cuentascorrientes/listado_pedidos_pendientes.html', contexto)
+
+#==============================================================================
+def listado_pedidos_entregados(request):
+    
+    movimientos = Pedidos.objects.filter(estado_id=2).annotate(
+        total_items=Count('detalles'),
+        total_kg=Sum('detalles__cantidad'),
+        total_importe=Sum(
+            F('detalles__cantidad') * F('detalles__importe_unitario'),
+            output_field=DecimalField()
+            )
+    )
+
+    contexto = {
+        'objects': movimientos,
+    }
+
+    return render(request, 'cuentascorrientes/listado_pedidos_entregados.html', contexto)
+#==============================================================================
+def entregar_pedido(request, pedido_id):
+    #entregar un pedido genera el RM y cambia de estado el pedido a Entregado
+
+    user=request.user
+
+
+    try:
+        pedido = Pedidos.objects.get(id=pedido_id)
+    except Pedidos.DoesNotExist:
+        return redirect('cuentascorrientes:accion_ok', titulo='Pedido no encontrado!')
+
+    print("---------***--------")
+    print(pedido)
+    
+    #con los datos del usuario determino en que sucursal trabaja. un usuario no puede estar en dos sucursales.
+    # si se necesita que este en dos sucursales se crea otro usuario con acceso a esa otra sucursal y listo.
+    du = DatosUsuarios.objects.filter(usuario_id=user).first()
+    #print(du.sucursal.id)
+    datos_comprobante = Comprobantes.objects.filter(comprobante__nombre='RM').first()
+
+    print(datos_comprobante)
+    print('?'*30)
+    
+    if pedido.rm_realizado==1:
+        #redirecciono, ya esta hecho el RM en este pedido
+        return redirect('cuentascorrientes:accion_ok', titulo='El pedido ya tiene RM registrado!!')
+
+
+    ultimo = Remitos.objects.aggregate(Max('numero'))['numero__max']
+
+    try:
+        with transaction.atomic():
+            rm=Remitos()
+            rm.fecha=date.today()
+            rm.punto_de_venta=datos_comprobante.punto_de_venta
+            rm.numero= (ultimo or 0) + 1
+            rm.cliente_id= pedido.cliente_id
+            rm.sucursal_id= du.sucursal.id
+            rm.save()
+
+            detalle = PedidosDet.objects.filter(pedido_id = pedido_id)
+
+            detalles = [
+                RemitosDet(
+                    remito          = rm,
+                    codigo          = linea.codigo,
+                    descripcion     = linea.descripcion,
+                    importe_unitario= linea.importe_unitario,
+                    costo           = linea.costo,
+                    cantidad        = linea.cantidad,
+                    alicuota_iva    = None,
+                    dtounit         = 0,
+                    importe_iva     = 0
+                )
+                for linea in detalle
+            ]
+                
+            RemitosDet.objects.bulk_create(detalles)
+
+            pedido.rm_realizado=1
+            pedido.estado_id=2
+            pedido.rm_asociado= rm
+            pedido.save()
+    except Exception as e:
+        return redirect('cuentascorrientes:accion_ok', titulo=f"Error al generar el RM. Codigo de error {str(e)}")
+
+    return redirect('cuentascorrientes:accion_ok', titulo="El egreso fue registrado correctamente.")
+
+#==================================================================================================
+def detalle_pedido(request, pk):
+    pedido = get_object_or_404(Pedidos.objects.select_related('cliente', 'sucursal', 'estado', 'rm_asociado', 'usuario'), pk=pk)
+    detalles = pedido.detalles.all()  # gracias a `related_name='detalles'`
+    
+    return render(request, 'cuentascorrientes/pedido_detalle.html', {
+        'pedido': pedido,
+        'detalles': detalles,
+    })
+
+
+
 
 
 
