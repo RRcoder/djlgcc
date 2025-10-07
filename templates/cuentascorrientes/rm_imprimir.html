@@ -11,7 +11,8 @@
     }
     .encabezado { text-align: center; font-weight: bold; margin-bottom: 20px; }
     .detalle { border-collapse: collapse; width: 100%; }
-    .detalle th, .detalle td { border: 1px solid #000; padding: 5px; }
+    .detalle th { border: 1px solid #000; padding: 5px; }
+    .detalle td { border: 0px solid #000; padding: 2px; }
   </style>
 </head>
 <body>
@@ -26,19 +27,25 @@
 
   <table class="detalle">
     <thead>
-      <tr><th>Producto</th><th>Cantidad</th><th>Precio</th></tr>
+        <tr>
+            <th style="width:50%; text-align:left;">Descripcion</th>
+            <th style="text-align:right;">Cantidad</th>
+            <th style="text-align:right;">Precio unitario</th>
+            <th style="text-align:right;">Total</th>
+        </tr>
     </thead>
     <tbody>
       {% for item in objects_det %}
       <tr>
-        <td>{{ item.producto.nombre }}</td>
-        <td>{{ item.cantidad }}</td>
-        <td>{{ item.precio }}</td>
+        <td>{{ item.codigo }} {{ item.descripcion }}</td>
+        <td style="text-align:right;">{{ item.cantidad }}</td>
+        <td style="text-align:right;">{{ item.importe_unitario }}</td>
+        <td style="text-align:right;">{{ item.total|floatformat:2}}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <p style="text-align:right;">Total: ${{ remito.total }}</p>
+  <p style="text-align:right;font-weight: bold;">Total: ${{ remito.total_general|floatformat:2 }}</p>
 </body>
 </html>

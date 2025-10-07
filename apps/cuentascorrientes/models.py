@@ -96,6 +96,14 @@ class RemitosDet(models.Model):
     #nped      | int(11)       | YES  |     | NULL    |                |
     #codrep          | varchar(20)   | YES  |     | NULL    |                |
 
+    @property
+    def total(self):
+        """Calcula el total por ítem, con o sin descuento"""
+        precio_unitario = self.importe_unitario or 0
+        cantidad = self.cantidad or 0
+        return precio_unitario * cantidad
+
+
 
 class PedidosTmp(models.Model):
     fecha        = models.DateField(null=True, blank=True)

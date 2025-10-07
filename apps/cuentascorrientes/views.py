@@ -585,7 +585,13 @@ def detalle_pedido(request, pk):
 #==================================================================================================
 @login_required
 def rm_imprimir(request, remito_id):
-    comprobante = Remitos.objects.get(id=remito_id)
+    comprobante = Remitos.objects.annotate(
+        total_general=Sum(
+            ExpressionWrapper(F('detalles__importe_unitario') * F('detalles__cantidad'),
+            output_field=DecimalField()
+            )
+        )
+    ).get(id=remito_id)
     #.annotate(
         #total=Sum(
             #ExpressionWrapper(
@@ -604,11 +610,11 @@ def rm_imprimir(request, remito_id):
     print("))))))))))))))))))))))")
     print(comprobante)
 
-    print(    comprobante.detalles)
+    print(    comprobante.detalles.all())
 
 
     #remito = get_object_or_404(Remitos, pk=remito_id)
-    return render(request, "cuentascorrientes/rm_imprimir.html", {"remito": comprobante, 'objects_det': []})
+    return render(request, "cuentascorrientes/rm_imprimir.html", {"remito": comprobante, 'objects_det': comprobante.detalles.all()})
 
 
 
