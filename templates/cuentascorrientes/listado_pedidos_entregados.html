@@ -28,7 +28,7 @@
                     <td>{{ r.rm_asociado.fecha|date:'d/m/Y' }}</td>
                     <td class="text-end">{{ r.total_importe }}</td>
                     <td>
-                    <a href="{% url 'cuentascorrientes:listado_pedidos_form' %}" class="btn btn-sm btn-primary">Imprimir</a>
+                    <a href="{% url 'cuentascorrientes:rm_imprimir' remito_id=r.id %}" target="blank" class="btn btn-sm btn-primary">Imprimir</a>
                     </td>
                 </tr>
             {% empty %}

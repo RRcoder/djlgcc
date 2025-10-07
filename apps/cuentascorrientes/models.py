@@ -84,7 +84,7 @@ class Remitos(models.Model):
         return "RM {} - {}".format(self.punto_de_venta, self.numero)
 
 class RemitosDet(models.Model):
-    remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT)
+    remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT, related_name='detalles')
     codigo           = models.CharField(max_length=10, null=True, blank=True)
     descripcion      = models.CharField(max_length=60)
     importe_unitario = models.DecimalField(max_digits=12, decimal_places=2)

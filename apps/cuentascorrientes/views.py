@@ -583,6 +583,36 @@ def detalle_pedido(request, pk):
         'detalles': detalles,
     })
 #==================================================================================================
+@login_required
+def rm_imprimir(request, remito_id):
+    comprobante = Remitos.objects.get(id=remito_id)
+    #.annotate(
+        #total=Sum(
+            #ExpressionWrapper(
+                #F('remitosdet__importe_unitario')  * F('remitosdet__cantidad'),
+                #output_field=DecimalField(max_digits=14, decimal_places=2)
+            #)
+        #),
+        #comprobante=Concat(
+        #Value('RM '),
+        #Cast('punto_de_venta', CharField()),
+        #Value('-'),
+        #Cast('numero', CharField())
+    #)
+    #).order_by('fecha','punto_de_venta', 'numero')
+
+    print("))))))))))))))))))))))")
+    print(comprobante)
+
+    print(    comprobante.detalles)
+
+
+    #remito = get_object_or_404(Remitos, pk=remito_id)
+    return render(request, "cuentascorrientes/rm_imprimir.html", {"remito": comprobante, 'objects_det': []})
+
+
+
+
 
 
 

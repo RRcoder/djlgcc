@@ -7,7 +7,7 @@ from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes
 
 from .views import listado_pedidos_entregados, detalle_pedido
 
-from .views import ingresar_pagos_form, entregar_pedido 
+from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir 
 
 app_name="cuentascorrientes"
 
@@ -51,7 +51,7 @@ urlpatterns = [
     # Listado de testeo
     path('listado_pedidos', listado_pedidos, name='listado_pedidos'),
 
-
+    path("rm_imprimir/<int:remito_id>", rm_imprimir, name="rm_imprimir"),
 
 
 
