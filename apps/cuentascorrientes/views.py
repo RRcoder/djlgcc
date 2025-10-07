@@ -21,36 +21,41 @@ from django.contrib.auth.decorators import login_required
 
 from datetime import date
 
+#==================================================================================================
 class ListaPreciosListView(LoginRequiredMixin, ListView):
     model = ListaPrecios
     template_name = 'lista_precios_list.html'  # Ruta al template
     context_object_name = 'items'  # Nombre del objeto en el template
     ordering = ['codigo']  # Ordenar por código, podés cambiarlo
 
-
-class ListaPreciosCreateView(CreateView):
+#==================================================================================================
+class ListaPreciosCreateView(LoginRequiredMixin, CreateView):
     model = ListaPrecios
     form_class = ListaPreciosForm
     template_name = 'cuentascorrientes/lista_precios_add.html'
     success_url = reverse_lazy('cuentascorrientes:accion_ok', kwargs={'titulo':"Alta Producto en Lista de precios OK"})
 
-
-class ListaPreciosUpdateView(UpdateView):
+#==================================================================================================
+class ListaPreciosUpdateView(LoginRequiredMixin, UpdateView):
     model = ListaPrecios
     form_class = ListaPreciosForm
     template_name = 'cuentascorrientes/lista_precios_edit.html'
     success_url = reverse_lazy('cuentascorrientes:lista_precios_list')  # Redirige al listado después de guardar
 
+#==================================================================================================
+@login_required
 def AccionOk(request, titulo):
     return render(request, 'cuentascorrientes/accion_ok.html', context={'titulo':titulo})
 
-class ClientesListView(ListView):
+#==================================================================================================
+class ClientesListView(LoginRequiredMixin, ListView):
     model = Clientes
     template_name = 'clientes_list.html'  # Ruta al template
     context_object_name = 'items'  # Nombre del objeto en el template
     ordering = ['id']  # Ordenar por código, podés cambiarlo 
 
-class ClientesCreateView(CreateView):
+#==================================================================================================
+class ClientesCreateView(LoginRequiredMixin, CreateView):
     model = Clientes
     form_class = ClientesForm
     template_name = 'cuentascorrientes/clientes_add.html'
@@ -68,19 +73,21 @@ class ClientesCreateView(CreateView):
 
         return super().form_valid(form)
 
-class ClientesUpdateView(UpdateView):
+#==================================================================================================
+class ClientesUpdateView(LoginRequiredMixin, UpdateView):
     model = Clientes
     form_class = ClientesForm
     template_name = 'cuentascorrientes/clientes_edit.html'
     success_url = reverse_lazy('cuentascorrientes:clientes_list')
 
-
+#==================================================================================================
+@login_required
 def inicio(request):
-
     context={}
     return render(request, 'inicio.html', context  )
 
-class CtaCteFormView(UpdateView):
+#==================================================================================================
+class CtaCteFormView(LoginRequiredMixin, UpdateView):
     model = Clientes
     template_name="cuentascorrientes/ctacte_form.html"
     form_class = CtaCteForm
@@ -93,7 +100,8 @@ class CtaCteFormView(UpdateView):
         self.object.save()
         return super().form_valid(form)
 
-class CtaCteBlockFormView(UpdateView):
+#==================================================================================================
+class CtaCteBlockFormView(LoginRequiredMixin, UpdateView):
     model = Clientes
     template_name="cuentascorrientes/ctacteblock_form.html"
     form_class = CtaCteBlockForm
@@ -108,8 +116,8 @@ class CtaCteBlockFormView(UpdateView):
         self.object.save()
         return super().form_valid(form)
 
-
-class EntregaMercaderiaDetFormView(FormView):
+#==================================================================================================
+class EntregaMercaderiaDetFormView(LoginRequiredMixin, FormView):
     template_name = 'cuentascorrientes/entrega_mercaderia_form.html'
     form_class = EntregaMercaderiaDetForm
     success_url = reverse_lazy('cuentascorrientes:entrega_mercaderia') # URL donde redirigir después de éxito
@@ -262,6 +270,7 @@ def guardar_pedido(request):
         print(form.errors)
 
 #==================================================================================================
+@login_required
 def listado_pedidos_form(request):
     if request.method == 'POST':
         form = ElegirClienteForm(request.POST)
@@ -311,6 +320,7 @@ def listado_pedidos_form(request):
     
     return render(request, 'cuentascorrientes/elegir_cliente_form.html', {'form': form})
 #==================================================================================================
+@login_required
 def listado_pedidos(request):
     cliente_id=3
     cliente = get_object_or_404(Clientes, pk=cliente_id)
@@ -350,7 +360,8 @@ def listado_pedidos(request):
 
     return render(request, 'cuentascorrientes/listado_pedidos.html', contexto)
 
-#-----------------------------------------------------------------------------
+#==================================================================================================
+@login_required
 def ingresar_pagos_form(request):
     if request.method == 'POST':
         print('')
@@ -379,6 +390,7 @@ def ingresar_pagos_form(request):
         return render(request, 'cuentascorrientes/ingresar_comprobante_form.html', {'form': form})
 
 #==================================================================================================
+@login_required
 def listado_pedidos_pendientes_form(request):
 
     cliente_id=None
@@ -423,6 +435,7 @@ def listado_pedidos_pendientes_form(request):
         return render(request, 'cuentascorrientes/elegir_cliente_form.html', {'form': form, 'titulo': "Listado de pedidos pendientes"})
 
 #==============================================================================
+@login_required
 def listado_pedidos_pendientes(request):
     
     movimientos = Pedidos.objects.filter(estado_id=1).annotate(
@@ -471,6 +484,7 @@ def listado_pedidos_pendientes(request):
     return render(request, 'cuentascorrientes/listado_pedidos_pendientes.html', contexto)
 
 #==============================================================================
+@login_required
 def listado_pedidos_entregados(request):
     
     movimientos = Pedidos.objects.filter(estado_id=2).annotate(
@@ -488,6 +502,7 @@ def listado_pedidos_entregados(request):
 
     return render(request, 'cuentascorrientes/listado_pedidos_entregados.html', contexto)
 #==============================================================================
+@login_required
 def entregar_pedido(request, pedido_id):
     #entregar un pedido genera el RM y cambia de estado el pedido a Entregado
 
@@ -558,6 +573,7 @@ def entregar_pedido(request, pedido_id):
     return redirect('cuentascorrientes:accion_ok', titulo="El egreso fue registrado correctamente.")
 
 #==================================================================================================
+@login_required
 def detalle_pedido(request, pk):
     pedido = get_object_or_404(Pedidos.objects.select_related('cliente', 'sucursal', 'estado', 'rm_asociado', 'usuario'), pk=pk)
     detalles = pedido.detalles.all()  # gracias a `related_name='detalles'`
@@ -566,6 +582,7 @@ def detalle_pedido(request, pk):
         'pedido': pedido,
         'detalles': detalles,
     })
+#==================================================================================================
 
 
 
