@@ -1,11 +1,11 @@
 version: "2"
 services:
-  lgcaja:
+  djlgcc:
     build: .
-    container_name: lgcaja
-    image: lgcaja:1.0
+    container_name: djlgcc
+    image: djlgcc:1.0
     environment:
-      - DJANGO_SETTINGS_MODULE=lgcaja.settings
+      - DJANGO_SETTINGS_MODULE=djlgcc.settings
       - DEV=1
       - PYTHONUNBUFFERED=1
       - MYSQL_USER=root
@@ -13,10 +13,10 @@ services:
       - MYSQL_HOST=mysqlserver
       - TZ=America/Argentina/Buenos_Aires
     ports:
-      - 8002:8002
+      - 8007:8007
     volumes:
       - ./:/app
-    command: python manage.py runserver 0.0.0.0:8002
+    command: python manage.py runserver 0.0.0.0:8007
     #command: tail -f /dev/null
     networks:
       - red_docker

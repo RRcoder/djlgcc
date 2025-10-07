@@ -69,23 +69,22 @@ class Remitos(models.Model):
     punto_de_venta = models.IntegerField()
     numero         = models.IntegerField()
     cliente        = models.ForeignKey('Clientes', on_delete=models.PROTECT)
-    #lista          = models. 
     bultos         = models.IntegerField(null=True, blank=True)
     pesoaprox      = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True) 
     valoraprox     = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True) 
     impreso        = models.BooleanField(null=True, blank=True)
-    #estado         = models.
     sucursal       = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT)
+    usuario        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created        = models.DateTimeField(auto_now_add=True)
+    #lista          = models. 
+    #estado         = models.
     #condvta        = models. 
-    #responsable    =
-    #transporte     =
     
     def __str__(self):
         return "RM {} - {}".format(self.punto_de_venta, self.numero)
 
 class RemitosDet(models.Model):
     remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT)
-    #codrep          | varchar(20)   | YES  |     | NULL    |                |
     codigo           = models.CharField(max_length=10, null=True, blank=True)
     descripcion      = models.CharField(max_length=60)
     importe_unitario = models.DecimalField(max_digits=12, decimal_places=2)
@@ -95,6 +94,7 @@ class RemitosDet(models.Model):
     dtounit          = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
     importe_iva      = models.DecimalField(max_digits=12, decimal_places=2, null= True, blank=True)
     #nped      | int(11)       | YES  |     | NULL    |                |
+    #codrep          | varchar(20)   | YES  |     | NULL    |                |
 
 
 class PedidosTmp(models.Model):

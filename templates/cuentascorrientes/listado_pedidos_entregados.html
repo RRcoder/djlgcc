@@ -14,15 +14,13 @@
                 <th>Fecha Entrega</th>
                 <th class="text-end">Total</th>
                 <th></th>
-                <th></th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
             {% for r in objects %}
                 <tr>
                     <td>{{ r.id }} 
-                        <a href="{% url 'cuentascorrientes:detalle_pedido' pk=r.id%}">Detalle</a>
+                    <a href="{% url 'cuentascorrientes:detalle_pedido' pk=r.id%}" class="btn btn-secondary btn-xs" role="button"><i class="bi bi-eye"></i></a>
                     </td>
                     <td>{{ r.fecha|date:'d/m/Y' }}</td>
                     <td>{{ r.cliente }}</td>
@@ -31,7 +29,6 @@
                     <td class="text-end">{{ r.total_importe }}</td>
                     <td>
                     <a href="{% url 'cuentascorrientes:listado_pedidos_form' %}" class="btn btn-sm btn-primary">Imprimir</a>
-                    <a href="{% url 'cuentascorrientes:listado_pedidos_form' %}" class="btn btn-sm btn-primary">Cargar FC</a>
                     </td>
                 </tr>
             {% empty %}

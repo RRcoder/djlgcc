@@ -2,26 +2,61 @@
 {% block content %}
 <div class="container-fluid">
 
-<h1>Detalle del Pedido #{{ pedido.id }}</h1>
+<h3>Detalle del Pedido #{{ pedido.id }}</h3>
 
-<p><strong>Fecha:</strong> {{ pedido.fecha }}</p>
-<p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
-<p><strong>Sucursal:</strong> {{ pedido.sucursal }}</p>
+<div class="row">
+    <div class="col-6">
+        <strong>Cliente:</strong> {{ pedido.cliente }}
+    </div>
+    <div class="col-6">
+        <strong>Fecha del Pedido:</strong> {{ pedido.fecha }}<br/>
+        <strong>Sucursal:</strong> {{ pedido.sucursal.nombre }}
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+    </div>
+    <div class="col-6">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-6">
+        <strong>Creado por:</strong> {{ pedido.usuario }}<br/>
+        <strong>Fecha creacion:</strong> {{ pedido.created }}
+    </div>
+    <div class="col-6">
+    </div>
+</div>
+
 <p><strong>Estado:</strong> {{ pedido.estado }}</p>
-<p><strong>Usuario:</strong> {{ pedido.usuario }}</p>
-<p><strong>Remito Asociado:</strong> {{ pedido.rm_asociado }}</p>
+
+{% if pedido.rm_realizado %}
+<div class="row">
+    <div class="col-6">
+        <strong>Remito Asociado:</strong> {{ pedido.rm_asociado }}<br>
+        <strong>Realizado por:</strong> {{ pedido.rm_asociado.usuario }}<br/>
+        <strong>Creado:</strong> {{ pedido.rm_asociado.created }}<br/>
+    </div>
+    <div class="col-6">
+        <strong>Fecha del RM:</strong> {{ pedido.rm_asociado.fecha }}<br/>
+    </div>
+</div>
+
+{% endif %}
+
 
 <hr>
 
-<h2>Ítems del Pedido</h2>
-<table border="1">
+<h2>Detalle</h2>
+<table class="table">
     <thead>
         <tr>
             <th>Código</th>
             <th>Descripción</th>
-            <th>Cantidad</th>
-            <th>Importe Unitario</th>
-            <th>Costo</th>
+            <th class="text-end">Cantidad</th>
+            <th class="text-end">Importe Unitario</th>
+            <th class="text-end">Costo</th>
         </tr>
     </thead>
     <tbody>
@@ -29,9 +64,9 @@
         <tr>
             <td>{{ item.codigo }}</td>
             <td>{{ item.descripcion }}</td>
-            <td>{{ item.cantidad }}</td>
-            <td>{{ item.importe_unitario }}</td>
-            <td>{{ item.costo }}</td>
+            <td class="text-end">{{ item.cantidad }}</td>
+            <td class="text-end">{{ item.importe_unitario }}</td>
+            <td class="text-end">{{ item.costo }}</td>
         </tr>
         {% endfor %}
     </tbody>

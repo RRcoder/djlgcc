@@ -526,6 +526,7 @@ def entregar_pedido(request, pedido_id):
             rm.numero= (ultimo or 0) + 1
             rm.cliente_id= pedido.cliente_id
             rm.sucursal_id= du.sucursal.id
+            rm.usuario = user 
             rm.save()
 
             detalle = PedidosDet.objects.filter(pedido_id = pedido_id)
