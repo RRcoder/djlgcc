@@ -12,8 +12,8 @@ services:
       - MYSQL_PASSWORD=flash
       - MYSQL_HOST=mysqlserver
       - TZ=America/Argentina/Buenos_Aires
-    ports:
-      - 8007:8007
+    expose:
+      - 8007
     volumes:
       - ./:/app
     command: python manage.py runserver 0.0.0.0:8007
