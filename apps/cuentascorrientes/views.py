@@ -18,6 +18,7 @@ from django.shortcuts import redirect
 from django.shortcuts import get_object_or_404
 
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from datetime import date
 
@@ -616,6 +617,18 @@ def rm_imprimir(request, remito_id):
     #remito = get_object_or_404(Remitos, pk=remito_id)
     return render(request, "cuentascorrientes/rm_imprimir.html", {"remito": comprobante, 'objects_det': comprobante.detalles.all()})
 
+#==================================================================================================
+@login_required
+def pedido_eliminar(request, pedido_id):
+    pedido = get_object_or_404(Pedidos.objects.select_related('cliente', 'sucursal', 'estado', 'rm_asociado', 'usuario'), id=pedido_id)
+    detalles = pedido.detalles.all()  # gracias a `related_name='detalles'`
+
+    if request.method == 'POST':
+        pedido.delete()
+        messages.success(request, "El pedido fue eliminado exitosamente.")
+        return redirect('lista_pedidos')  # Cambia esto a la vista/listado que tengas
+
+    return render(request, 'cuentascorrientes/pedido_eliminar.html', {'pedido': pedido, 'detalles': detalles})
 
 
 

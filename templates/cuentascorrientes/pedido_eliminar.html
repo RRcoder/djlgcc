@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+
+<h3>Detalle del Pedido #{{ pedido.id }}</h3>
+
+<div class="row">
+    <div class="col-6">
+        <strong>Cliente:</strong> {{ pedido.cliente }}
+    </div>
+    <div class="col-6">
+        <strong>Fecha del Pedido:</strong> {{ pedido.fecha }}<br/>
+        <strong>Sucursal:</strong> {{ pedido.sucursal.nombre }}
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+    </div>
+    <div class="col-6">
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-6">
+        <strong>Creado por:</strong> {{ pedido.usuario }}<br/>
+        <strong>Fecha creacion:</strong> {{ pedido.created }}
+    </div>
+    <div class="col-6">
+    </div>
+</div>
+
+<p><strong>Estado:</strong> {{ pedido.estado }}</p>
+
+{% if pedido.rm_realizado %}
+<div class="row">
+    <div class="col-6">
+        <strong>Remito Asociado:</strong> {{ pedido.rm_asociado }}<br>
+        <strong>Realizado por:</strong> {{ pedido.rm_asociado.usuario }}<br/>
+        <strong>Creado:</strong> {{ pedido.rm_asociado.created }}<br/>
+    </div>
+    <div class="col-6">
+        <strong>Fecha del RM:</strong> {{ pedido.rm_asociado.fecha }}<br/>
+    </div>
+</div>
+
+{% endif %}
+
+
+<hr>
+
+<h2>Detalle</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th class="text-end">Cantidad</th>
+            <th class="text-end">Importe Unitario</th>
+            <th class="text-end">Costo</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in detalles %}
+        <tr>
+            <td>{{ item.codigo }}</td>
+            <td>{{ item.descripcion }}</td>
+            <td class="text-end">{{ item.cantidad }}</td>
+            <td class="text-end">{{ item.importe_unitario }}</td>
+            <td class="text-end">{{ item.costo }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<form method="post">
+    {% csrf_token %}
+    <p>¿Estás seguro que deseas eliminar este pedido?</p>
+    <button type="submit" class="btn btn-danger">Confirmar Eliminar</button>
+</form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+{% endblock %}
+
+

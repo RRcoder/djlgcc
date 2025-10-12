@@ -5,7 +5,7 @@ from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, Acc
 from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form
 from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes
 
-from .views import listado_pedidos_entregados, detalle_pedido
+from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar
 
 from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir 
 
@@ -45,7 +45,7 @@ urlpatterns = [
     path('detalle_pedido/<int:pk>', detalle_pedido, name='detalle_pedido'),
 
 
-
+    path('pedido_eliminar/<int:pedido_id>', pedido_eliminar, name='pedido_eliminar'),
 
 
     # Listado de testeo

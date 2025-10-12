@@ -30,6 +30,7 @@
                     <td>
                     <a href="{% url 'cuentascorrientes:entregar_pedido' pedido_id=r.id%}" class="btn btn-sm btn-primary">Entregar</a>
                     <!--<a href="{% url 'cuentascorrientes:listado_pedidos_form' %}" class="btn btn-sm btn-primary">Cargar FC</a>-->
+                    <a href="{% url 'cuentascorrientes:pedido_eliminar' pedido_id=r.id %}" class="btn btn-danger btn-sm">Eliminar</a>
                     </td>
                 </tr>
             {% empty %}
