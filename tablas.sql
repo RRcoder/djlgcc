@@ -31,6 +31,8 @@ insert into empresa_comprobantes values (null, ' ', 10, 1,1,1);
 
 ver de no dejar crear ni entregar pedidos si la cc esta bloqueada.
 
+insert into cuentascorrientes_estadoscc values (null, 'A', 'Activa');
+insert into cuentascorrientes_estadoscc values (null, 'B', 'Bloqueada');
 
 
 
