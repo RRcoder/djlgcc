@@ -61,6 +61,19 @@ class Clientes(models.Model):
             #return "CUIT: {}".format(self.cuit)
         return "{}: {}".format(self.tipo_documento.codigo, self.cuit)
 
+    def get_localidad_provincia(self):
+        rta=''
+        if self.localidad is not None:
+            rta+= self.localidad
+        
+        if self.provincia is not None:
+            if len(rta)>0:
+                rta+= " - " + self.provincia.nombre
+            else:
+                rta+= self.provincia.nombre
+
+        return rta
+
     def __str__(self):
         return "({}) {}".format(self.id, self.nombre)
 
@@ -81,7 +94,7 @@ class Remitos(models.Model):
     #condvta        = models. 
     
     def __str__(self):
-        return "RM {} - {}".format(self.punto_de_venta, self.numero)
+        return "RTO {:05d}-{:08d}".format(self.punto_de_venta, self.numero)
 
 class RemitosDet(models.Model):
     remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT, related_name='detalles')

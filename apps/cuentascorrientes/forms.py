@@ -6,11 +6,16 @@ class ListaPreciosForm(forms.ModelForm):
         model = ListaPrecios
         fields = ['codigo', 'descripcion', 'precio', 'costo']
         widgets = {
-        'codigo': forms.TextInput(attrs={'class': 'form-control'}),
+        'codigo': forms.TextInput(attrs={'class': 'form-control', 'style': 'text-transform: uppercase;'}),
         'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
         'precio': forms.NumberInput(attrs={'class': 'form-control'}),
         'costo': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['codigo'].widget.attrs['maxlength'] = '5'  # tengo q forzarlo en el init pq django usa el largo del campo del modelo y no funca poniendolo en attrs
+
 
 class ClientesForm(forms.ModelForm):
     class Meta:
@@ -57,7 +62,7 @@ class EntregaMercaderiaForm(forms.Form):
     cliente = forms.ModelChoiceField(queryset=Clientes.objects.all(), label="Selecciona un Cliente") 
 
 class EntregaMercaderiaDetForm(forms.Form):
-    producto = forms.ModelChoiceField(queryset=ListaPrecios.objects.all(), label="Seleccione producto") 
+    producto = forms.ModelChoiceField(queryset=ListaPrecios.objects.all().order_by('codigo'), label="Seleccione producto") 
     cantidad = forms.DecimalField() 
     proceso_id = forms.CharField(widget=forms.HiddenInput(),  label="")
     cliente_id = forms.CharField(widget=forms.HiddenInput(),  label="")

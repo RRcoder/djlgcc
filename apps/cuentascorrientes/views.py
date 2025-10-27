@@ -36,6 +36,14 @@ class ListaPreciosCreateView(LoginRequiredMixin, CreateView):
     template_name = 'cuentascorrientes/lista_precios_add.html'
     success_url = reverse_lazy('cuentascorrientes:accion_ok', kwargs={'titulo':"Alta Producto en Lista de precios OK"})
 
+    def form_valid(self, form):
+        # No guardamos todavía
+        item = form.save(commit=False)
+
+        item.codigo = item.codigo.upper()
+        item.save()
+
+        return super().form_valid(form)
 #==================================================================================================
 class ListaPreciosUpdateView(LoginRequiredMixin, UpdateView):
     model = ListaPrecios

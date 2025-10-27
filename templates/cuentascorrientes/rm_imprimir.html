@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Remito #{{ remito.id }}</title>
+  <title></title>
   <style>
     @media print {
       @page { margin: 20mm; }
@@ -11,8 +11,22 @@
     }
     .encabezado { text-align: center; font-weight: bold; margin-bottom: 20px; }
     .detalle { border-collapse: collapse; width: 100%; }
-    .detalle th { border: 1px solid #000; padding: 5px; }
+    .detalle th { border-bottom: 1px solid #000; padding: 5px; }
     .detalle td { border: 0px solid #000; padding: 2px; }
+
+
+    .fila { display: flex; width: 100%; }
+    .mitad {
+    flex: 1;              /* cada div toma el mismo espacio disponible */
+    padding: 10px;        /* opcional, para separar contenido del borde */
+    box-sizing: border-box; /* asegura que padding no rompa el ancho */
+    border: 1px solid #000; /* solo para que se vea el div */
+    }
+    .firma_div {
+        margin-top: 130px;
+        text-align: right;
+        padding-right: 40px;
+    }
   </style>
 </head>
 <body>
@@ -20,15 +34,33 @@
     <button onclick="window.print()">🖨️ Imprimir</button>
   </div>
 
-  <div class="encabezado">
-      <h2>Remito {{ remito.punto_de_venta|stringformat:"05d"}}-{{ remito.numero|stringformat:"08d"}}</h2>
-    <p>Fecha: {{ remito.fecha|date:"d/m/Y" }}</p>
+  <div class="fila">
+    <div class="mitad">
+ <h3>
+ Carnicería LG
+ </h3>
+        Sócrates 2647<br>
+        Tel: 291 4736193<br>
+    </div>
+    <div class="mitad">
+      <div class="encabezado">
+          <h2>RTO {{ remito.punto_de_venta|stringformat:"05d"}}-{{ remito.numero|stringformat:"08d"}}</h2>
+        <p>Fecha: {{ remito.fecha|date:"d/m/Y" }}</p>
+      </div>
+
+    </div>
+
   </div>
+  <br>
+
+  <b>Cliente: </b>{{ remito.cliente}} <br>
+  {{ remito.cliente.get_domicilio}} <br>
+  {{ remito.cliente.get_localidad_provincia }} <br>
 
   <table class="detalle">
     <thead>
         <tr>
-            <th style="width:50%; text-align:left;">Descripcion</th>
+            <th style="width:50%; text-align:left;">Descripción</th>
             <th style="text-align:right;">Cantidad</th>
             <th style="text-align:right;">Precio unitario</th>
             <th style="text-align:right;">Total</th>
@@ -47,5 +79,11 @@
   </table>
 
   <p style="text-align:right;font-weight: bold;">Total: ${{ remito.total_general|floatformat:2 }}</p>
+
+
+
+  <div class="firma_div">
+      Firma: ..................................................
+  </div>
 </body>
 </html>
