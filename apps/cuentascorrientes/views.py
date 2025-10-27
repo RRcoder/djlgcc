@@ -61,7 +61,7 @@ class ClientesListView(LoginRequiredMixin, ListView):
     model = Clientes
     template_name = 'clientes_list.html'  # Ruta al template
     context_object_name = 'items'  # Nombre del objeto en el template
-    ordering = ['id']  # Ordenar por código, podés cambiarlo 
+    ordering = ['nombre']
 
 #==================================================================================================
 class ClientesCreateView(LoginRequiredMixin, CreateView):
@@ -639,6 +639,32 @@ def pedido_eliminar(request, pedido_id):
     return render(request, 'cuentascorrientes/pedido_eliminar.html', {'pedido': pedido, 'detalles': detalles})
 
 
+#==================================================================================================
+def informe_pedidos(request):
+    # Si el formulario es enviado
+    if request.method == 'GET' and 'buscar' in request.GET:
+        form = InformePedidosForm(request.GET)
+        
+        if form.is_valid():
+            cliente = form.cleaned_data['cliente']
+            fecha_desde = form.cleaned_data['fecha_desde']
+            fecha_hasta = form.cleaned_data['fecha_hasta']
+
+            # Filtramos los pedidos con los parámetros
+            pedidos = Pedidos.objects.filter(
+                cliente=cliente,
+                estado__codigo='E',  # Asumiendo que "codigo" es el campo que contiene el estado 'E'
+                fecha__range=[fecha_desde, fecha_hasta]
+            ).select_related('cliente', 'estado', 'sucursal').order_by('fecha')
+
+            return render(request, 'informe_pedidos.html', {
+                'form': form,
+                'pedidos': pedidos
+            })
+    else:
+        form = InformePedidosForm()
+
+    return render(request, 'informe_pedidos.html', {'form': form})
 
 
 

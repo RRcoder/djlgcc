@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Pedidos</title>
+</head>
+<body>
+    <h1>Informe de Pedidos con Estado 'E'</h1>
+
+    <!-- Formulario de búsqueda -->
+    <form method="GET">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" name="buscar">Buscar</button>
+    </form>
+
+    <!-- Resultados -->
+    {% if pedidos %}
+        <h2>Resultados:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Sucursal</th>
+                    <th>Estado</th>
+                    <th>RM Realizado</th>
+                    <th>RM Asociado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                    <tr>
+                        <td>{{ pedido.fecha }}</td>
+                        <td>{{ pedido.cliente.nombre }}</td>
+                        <td>{{ pedido.sucursal.nombre }}</td>
+                        <td>{{ pedido.estado.codigo }}</td>
+                        <td>{{ pedido.rm_realizado }}</td>
+                        <td>{{ pedido.rm_asociado }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No se encontraron pedidos para los criterios seleccionados.</p>
+    {% endif %}
+</body>
+</html>
+

@@ -99,4 +99,12 @@ class IngresarComprobanteForm(forms.Form):
     #iva = forms.DecimalField( label='IVA', max_digits=10, decimal_places=2    )
 
 
+class InformePedidosForm(forms.Form):
+    cliente = forms.ModelChoiceField(queryset=Clientes.objects.all(), required=True, label='Cliente')
+    fecha_desde = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Desde')
+    fecha_hasta = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Hasta')
+
+
+
+
 
