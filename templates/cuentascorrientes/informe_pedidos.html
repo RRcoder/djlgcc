@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe de Pedidos</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
     <h1>Informe de Pedidos con Estado 'E'</h1>
 
     <!-- Formulario de búsqueda -->
@@ -45,6 +40,7 @@
     {% else %}
         <p>No se encontraron pedidos para los criterios seleccionados.</p>
     {% endif %}
-</body>
-</html>
+
+</div>
+{% endblock %}
 

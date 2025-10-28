@@ -7,7 +7,7 @@ from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, Remit
 
 from apps.empresa.models import DatosUsuarios, Comprobantes
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
-from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm
+from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField, Count
 from django.db.models.functions import Round, Coalesce, Concat, Cast
@@ -657,14 +657,14 @@ def informe_pedidos(request):
                 fecha__range=[fecha_desde, fecha_hasta]
             ).select_related('cliente', 'estado', 'sucursal').order_by('fecha')
 
-            return render(request, 'informe_pedidos.html', {
+            return render(request, 'cuentascorrientes/informe_pedidos.html', {
                 'form': form,
                 'pedidos': pedidos
             })
     else:
         form = InformePedidosForm()
 
-    return render(request, 'informe_pedidos.html', {'form': form})
+    return render(request, 'cuentascorrientes/informe_pedidos.html', {'form': form})
 
 
 

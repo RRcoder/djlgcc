@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk
 from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, AccionOk, CtaCteFormView
 from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form
-from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes
+from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes, informe_pedidos
 
 from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar
 
@@ -53,6 +53,8 @@ urlpatterns = [
 
     path("rm_imprimir/<int:remito_id>", rm_imprimir, name="rm_imprimir"),
 
+
+    path('informe/pedidos_entregados', informe_pedidos, name='informe_pedidos'),
 
 
 
