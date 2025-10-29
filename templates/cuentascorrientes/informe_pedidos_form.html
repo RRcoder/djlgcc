@@ -2,9 +2,9 @@
 {% block content %}
 <div class="container-fluid">
 
-    <h1>Informe de Pedidos con Estado 'E'</h1>
+    <h1>Informe de Pedidos Entregados</h1>
 
-    <form method="GET">
+    <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" name="buscar">Informe</button>

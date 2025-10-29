@@ -642,7 +642,10 @@ def pedido_eliminar(request, pedido_id):
 #==================================================================================================
 def informe_pedidos(request):
     # Si el formulario es enviado
-    if request.method == 'GET' and 'buscar' in request.GET:
+    if request.method == 'GET':
+        form = InformePedidosForm()
+        return render(request, 'cuentascorrientes/informe_pedidos_form.html', {'form': form})
+    else:
         form = InformePedidosForm(request.GET)
         
         if form.is_valid():
@@ -661,10 +664,6 @@ def informe_pedidos(request):
                 'form': form,
                 'pedidos': pedidos
             })
-    else:
-        form = InformePedidosForm()
-
-    return render(request, 'cuentascorrientes/informe_pedidos.html', {'form': form})
 
 
 
