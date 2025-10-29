@@ -646,7 +646,7 @@ def informe_pedidos(request):
         form = InformePedidosForm()
         return render(request, 'cuentascorrientes/informe_pedidos_form.html', {'form': form})
     else:
-        form = InformePedidosForm(request.GET)
+        form = InformePedidosForm(request.POST)
         
         if form.is_valid():
             cliente = form.cleaned_data['cliente']
@@ -658,15 +658,23 @@ def informe_pedidos(request):
                 cliente=cliente,
                 estado__codigo='E',  # Asumiendo que "codigo" es el campo que contiene el estado 'E'
                 fecha__range=[fecha_desde, fecha_hasta]
-            ).select_related('cliente', 'estado', 'sucursal').order_by('fecha')
+            ).select_related('cliente', 'estado', 'sucursal').order_by('fecha').annotate(
+                total_remitos=Sum(
+                ExpressionWrapper(
+                    F('rm_asociado__detalles__importe_unitario') * F('rm_asociado__detalles__cantidad'),
+                    output_field=DecimalField()
+                )
+                )
+            )
 
             return render(request, 'cuentascorrientes/informe_pedidos.html', {
                 'form': form,
                 'pedidos': pedidos
             })
+        else:
+            print("FORM ERRROR")
 
-
-
+            print(form.errors)
 
 
 

@@ -4,27 +4,26 @@
     <h1>Informe de Pedidos Entregados</h1>
 
     {% if pedidos %}
-        <h2>Resultados:</h2>
-        <table>
+        <table class="table">
             <thead>
                 <tr>
                     <th>Fecha</th>
-                    <th>Cliente</th>
                     <th>Sucursal</th>
-                    <th>Estado</th>
-                    <th>RM Realizado</th>
+                    <th>Cliente</th>
+                    <th>Domicilio</th>
                     <th>RM Asociado</th>
+                    <th>Importe total</th>
                 </tr>
             </thead>
             <tbody>
                 {% for pedido in pedidos %}
                     <tr>
-                        <td>{{ pedido.fecha }}</td>
-                        <td>{{ pedido.cliente.nombre }}</td>
+                        <td>{{ pedido.fecha|date:'d/m/Y' }}</td>
                         <td>{{ pedido.sucursal.nombre }}</td>
-                        <td>{{ pedido.estado.codigo }}</td>
-                        <td>{{ pedido.rm_realizado }}</td>
+                        <td>{{ pedido.cliente.nombre }} ({{ pedido.cliente.id }})</td>
+                        <td>{{ pedido.cliente.get_domicilio }}</td>
                         <td>{{ pedido.rm_asociado }}</td>
+                        <td>{{ pedido.total_remitos }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
