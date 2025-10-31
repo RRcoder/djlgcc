@@ -7,7 +7,7 @@ from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, Remit
 
 from apps.empresa.models import DatosUsuarios, Comprobantes
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
-from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm
+from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm, AgregarMercaderiaForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField, Count
 from django.db.models.functions import Round, Coalesce, Concat, Cast
@@ -586,10 +586,13 @@ def entregar_pedido(request, pedido_id):
 def detalle_pedido(request, pk):
     pedido = get_object_or_404(Pedidos.objects.select_related('cliente', 'sucursal', 'estado', 'rm_asociado', 'usuario'), pk=pk)
     detalles = pedido.detalles.all()  # gracias a `related_name='detalles'`
-    
+
+    form = AgregarMercaderiaForm()
+
     return render(request, 'cuentascorrientes/pedido_detalle.html', {
         'pedido': pedido,
         'detalles': detalles,
+        'form': form
     })
 #==================================================================================================
 @login_required

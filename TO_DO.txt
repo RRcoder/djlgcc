@@ -1,6 +1,5 @@
 Editar ped pend.
 
-listado ped entregados desde hasta
 
 
 Cargar RC
