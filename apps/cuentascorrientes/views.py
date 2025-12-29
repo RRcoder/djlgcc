@@ -587,7 +587,8 @@ def detalle_pedido(request, pk):
     pedido = get_object_or_404(Pedidos.objects.select_related('cliente', 'sucursal', 'estado', 'rm_asociado', 'usuario'), pk=pk)
     detalles = pedido.detalles.all()  # gracias a `related_name='detalles'`
 
-    form = AgregarMercaderiaForm()
+    #form = AgregarMercaderiaForm()
+    form = None
 
     return render(request, 'cuentascorrientes/pedido_detalle.html', {
         'pedido': pedido,

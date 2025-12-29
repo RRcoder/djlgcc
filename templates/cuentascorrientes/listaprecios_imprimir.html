@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Precios - Carnicería LG</title>
+    <style>
+        /* CONFIGURACIÓN A4 */
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            color: #222;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* BOTÓN DE IMPRESIÓN (OCULTO EN PAPEL) */
+        .no-print {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        button {
+            padding: 10px 25px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* ENCABEZADO DE LA LISTA */
+        .header-lista {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #000;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        .header-lista h1 {
+            margin: 0;
+            font-size: 24pt;
+            text-transform: uppercase;
+        }
+
+        .fecha-lista {
+            text-align: right;
+            font-size: 10pt;
+        }
+
+        /* TABLA DE PRECIOS */
+        .tabla-precios {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabla-precios th {
+            background-color: #333 !important;
+            color: white !important;
+            text-align: left;
+            padding: 10px;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .tabla-precios td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        /* Filas intercaladas para facilitar la lectura */
+        .tabla-precios tr:nth-child(even) {
+            background-color: #f2f2f2 !important;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .precio {
+            font-weight: bold;
+            text-align: right;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12pt;
+        }
+
+        .codigo {
+            color: #666;
+            font-size: 9pt;
+        }
+
+        /* PIE DE PÁGINA */
+        .footer {
+            margin-top: 30px;
+            font-size: 9pt;
+            text-align: center;
+            color: #777;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            .tabla-precios th { color: white !important; background-color: #333 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print">
+        <button onclick="window.print()">🖨️ Imprimir Lista de Precios</button>
+    </div>
+
+    <div style="max-width: 1000px; margin: auto; padding: 10px;">
+        
+        <header class="header-lista">
+            <div>
+                <h1>Carnicería LG</h1>
+                <p style="margin: 2px 0;">Lista de Precios al Público</p>
+            </div>
+            <div class="fecha-lista">
+                <strong>Fecha:</strong> {{ remito.fecha|date:"d/m/Y" }}<br>
+                Sócrates 2647 | Tel: 291 4736193
+            </div>
+        </header>
+
+        <table class="tabla-precios">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Código</th>
+                    <th style="width: 55%;">Descripción del Producto</th>
+                    <th style="width: 30%; text-align: right;">Precio Unitario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in objects_det %}
+                <tr>
+                    <td class="codigo">{{ item.codigo }}</td>
+                    <td>{{ item.descripcion }}</td>
+                    <td class="precio">$ {{ item.importe_unitario|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <footer class="footer">
+            Precios sujetos a cambios sin previo aviso - Carnicería LG
+        </footer>
+    </div>
+
+</body>
+</html>

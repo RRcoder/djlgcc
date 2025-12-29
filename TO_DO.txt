@@ -2,6 +2,11 @@ LISTO  -> Editar ped pend.
 
 LISTO  -> poder modificar detalle en entregamercaderia, cuando doy de alta el pedido pendiente.
 
+Lista de precios, que se pueda imprimir a pdf para enviar a WA
+
+Al momento de imprimir el RM usar una sola hoja.
+
+Lista de precios, cambiar precios de forma excepcional
 
 
 Cargar RC
