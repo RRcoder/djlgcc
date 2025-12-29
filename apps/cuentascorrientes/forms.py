@@ -116,6 +116,11 @@ class InformePedidosForm(forms.Form):
     fecha_hasta = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Hasta')
 
 
+# este form sirve cuando el pedido ya esta creado y esta pendiente.
+class AgregarMercaderiaForm(forms.Form):
+    producto = forms.ModelChoiceField(queryset=ListaPrecios.objects.all().order_by('codigo'), label="Seleccione producto") 
+    cantidad = forms.DecimalField() 
+    item_id = forms.CharField(widget=forms.HiddenInput(),  label="")
 
 
 

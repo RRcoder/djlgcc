@@ -586,10 +586,13 @@ def entregar_pedido(request, pedido_id):
 def detalle_pedido(request, pk):
     pedido = get_object_or_404(Pedidos.objects.select_related('cliente', 'sucursal', 'estado', 'rm_asociado', 'usuario'), pk=pk)
     detalles = pedido.detalles.all()  # gracias a `related_name='detalles'`
-    
+
+    form = AgregarMercaderiaForm()
+
     return render(request, 'cuentascorrientes/pedido_detalle.html', {
         'pedido': pedido,
         'detalles': detalles,
+        'form': form
     })
 #==================================================================================================
 @login_required
@@ -646,7 +649,7 @@ def informe_pedidos(request):
         form = InformePedidosForm()
         return render(request, 'cuentascorrientes/informe_pedidos_form.html', {'form': form})
     else:
-        form = InformePedidosForm(request.GET)
+        form = InformePedidosForm(request.POST)
         
         if form.is_valid():
             cliente = form.cleaned_data['cliente']
@@ -658,7 +661,14 @@ def informe_pedidos(request):
                 cliente=cliente,
                 estado__codigo='E',  # Asumiendo que "codigo" es el campo que contiene el estado 'E'
                 fecha__range=[fecha_desde, fecha_hasta]
-            ).select_related('cliente', 'estado', 'sucursal').order_by('fecha')
+            ).select_related('cliente', 'estado', 'sucursal').order_by('fecha').annotate(
+                total_remitos=Sum(
+                ExpressionWrapper(
+                    F('rm_asociado__detalles__importe_unitario') * F('rm_asociado__detalles__cantidad'),
+                    output_field=DecimalField()
+                )
+                )
+            )
 
             return render(request, 'cuentascorrientes/informe_pedidos.html', {
                 'form': form,
@@ -879,7 +889,6 @@ def guardar_pedido_edit(request):
             ]
             
             PedidosDet.objects.bulk_create(detalle_pedido)
-
         return redirect('cuentascorrientes:accion_ok', titulo='Pedido Modificado satisfactoriamente')
     else:
         print("fuuuck")
