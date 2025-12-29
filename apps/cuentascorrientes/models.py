@@ -130,6 +130,7 @@ class PedidosTmp(models.Model):
     cantidad     = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)    
     alicuota_iva = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)    
     rm_realizado = models.IntegerField(null=True, blank=True) 
+    edit_id      = models.IntegerField(null=True, blank=True) # este campo sirve para guardar el id del pedido en el caso de edicion de un pedido.
     updated      = models.DateTimeField(auto_now=True)
     created      = models.DateTimeField(auto_now_add=True)
 

@@ -1,6 +1,12 @@
-Editar ped pend.
+LISTO  -> Editar ped pend.
+
+LISTO  -> poder modificar detalle en entregamercaderia, cuando doy de alta el pedido pendiente.
 
 listado ped entregados desde hasta
 
 
 Cargar RC
+
+
+
+

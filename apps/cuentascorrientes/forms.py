@@ -67,7 +67,18 @@ class EntregaMercaderiaDetForm(forms.Form):
     proceso_id = forms.CharField(widget=forms.HiddenInput(),  label="")
     cliente_id = forms.CharField(widget=forms.HiddenInput(),  label="")
 
+class EntregaMercaderiaEditDetForm(forms.Form):
+    producto = forms.ModelChoiceField(queryset=ListaPrecios.objects.all().order_by('codigo'), label="Seleccione producto") 
+    cantidad = forms.DecimalField() 
+    proceso_id = forms.CharField(widget=forms.HiddenInput(),  label="")
+    cliente_id = forms.CharField(widget=forms.HiddenInput(),  label="")
+    pedido_orig_id = forms.CharField(widget=forms.HiddenInput(),  label="")
+
 class GuardarPedidoForm(forms.Form):
+    proceso_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
+    cliente_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
+
+class GuardarPedidoEditForm(forms.Form):
     proceso_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
     cliente_id = forms.IntegerField(widget=forms.HiddenInput(),  label="")
 

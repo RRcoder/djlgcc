@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container-fluid">
-    <h2>Entrega Mercaderia a {{ cliente }}</h2>
+    <h2>Modifica Pedido de {{ cliente }}</h2>
 
     <h3>
         Detalle a entregar
@@ -11,6 +11,9 @@
         {% csrf_token %}
             {{ form.proceso_id }}
             {{ form.cliente_id }}
+
+            <!--la variable la mande por contexto otra forma hubiera sido hacer otra sql en el get_initial y cargarla ahi como las dos de arriba-->
+            <input type="hidden" name="pedido_orig_id" value="{{ pedido_orig_id}}">
 
         <div class="row">
         <div class="col-md-3">
@@ -85,10 +88,10 @@
     </table>
 
 {% if datos_adic %}
-<form method="post" action="{% url 'cuentascorrientes:guardar_pedido' %}">
+<form method="post" action="{% url 'cuentascorrientes:guardar_pedido_edit' %}">
     {% csrf_token %}
     {{ form_extra.as_p }}
-    <button type="submit" class="btn btn-primary">Guardar Pedido</button>
+    <button type="submit" class="btn btn-primary">Guardar Modificaciones</button>
 </form>
 {% endif %}
 

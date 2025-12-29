@@ -6,8 +6,8 @@ from django.urls import reverse_lazy, reverse
 from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet
 
 from apps.empresa.models import DatosUsuarios, Comprobantes
-from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm
-from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm
+from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm, EntregaMercaderiaEditDetForm
+from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm, GuardarPedidoEditForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField, Count
 from django.db.models.functions import Round, Coalesce, Concat, Cast
@@ -634,7 +634,7 @@ def pedido_eliminar(request, pedido_id):
     if request.method == 'POST':
         pedido.delete()
         messages.success(request, "El pedido fue eliminado exitosamente.")
-        return redirect('lista_pedidos')  # Cambia esto a la vista/listado que tengas
+        return redirect('cuentascorrientes:listado_pedidos_pendientes')
 
     return render(request, 'cuentascorrientes/pedido_eliminar.html', {'pedido': pedido, 'detalles': detalles})
 
@@ -664,10 +664,226 @@ def informe_pedidos(request):
                 'form': form,
                 'pedidos': pedidos
             })
+#==================================================================================================
+@login_required
+def pedido_editar(request, pedido_id):
+    """
+        Voy a crear un id de proceso nuevo y cargar todo el pedido a la tabla pedidos tmp y que modifique 
+        todo lo que quiera. Con el boton Guardar Cambios meto todo en el pedido original.
+
+    """
+    #busco el pedido y el detalle
+    pedido= Pedidos.objects.get(id=pedido_id)
+    pedido_detalle= pedido.detalles.all()
+
+    with transaction.atomic():
+        #creo un proceso
+        proc = Procesos(nombre="Pedido")
+        proc.save()
+
+        #Creo el pedidotmp
+        ped = PedidosTmp(proceso_id=proc.id, fecha=pedido.fecha, cliente=pedido.cliente, sucursal=pedido.sucursal, rm_realizado=pedido.rm_realizado)
+
+        regs_pedidotmp = [
+            PedidosTmp(
+                fecha       = pedido.fecha, 
+                proceso_id  = proc.id, 
+                cliente     = pedido.cliente, 
+                sucursal    = pedido.sucursal, 
+                codigo      = linea.codigo,
+            descripcion = linea.descripcion,
+            precio      = linea.importe_unitario,
+                costo       = linea.costo,
+                cantidad    = linea.cantidad,
+                alicuota_iva=0,
+                rm_realizado=pedido.rm_realizado,
+                edit_id     = pedido.id                #guardo el id para saber sobre que pedido lo tengo que guardar cuando salve los cambios.
+            )
+            for linea in pedido_detalle
+        ]
+        
+        PedidosTmp.objects.bulk_create(regs_pedidotmp)
+
+    #aca ya tengo todo en TMP le dejo editar
+
+    #user=request.user
+    #datos_usuario = user.datos_usuario.get()
+
+    ##if request.method == 'POST':
+        ##pedido.delete()
+        ##messages.success(request, "El pedido fue eliminado exitosamente.")
+        ##return redirect('lista_pedidos')  # Cambia esto a la vista/listado que tengas
+        
+
+    return redirect('cuentascorrientes:entrega_mercaderia_edit_con_proceso_id', cliente_id=pedido.cliente_id , proceso_id=proc.id)
 
 
+@transaction.atomic
+def tmp_editar(request):
+    if request.method == 'POST':
+        tmp = get_object_or_404(PedidosTmp, id=request.POST['tmp_id'])
+        tmp.cantidad = request.POST['cantidad']
+        tmp.save()
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+@transaction.atomic
+def tmp_eliminar(request, id):
+    tmp = get_object_or_404(PedidosTmp, id=id)
+    tmp.delete()
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
+class EntregaMercaderiaEditDetFormView(LoginRequiredMixin, FormView):
+    template_name = 'cuentascorrientes/entrega_mercaderia_edit_form.html'
+    form_class = EntregaMercaderiaEditDetForm
+    success_url = reverse_lazy('cuentascorrientes:entrega_mercaderia_edit_con_proceso_id') # URL donde redirigir después de éxito
+
+    def get_initial(self):
+        initial = super().get_initial()
+        # si en la url viene el parametro lo uso sino creo un ID de proceso nuevo en la DB
+        proceso_id = self.kwargs.get('proceso_id')  # Si el parámetro viene por la URL
+        cliente_id = self.kwargs.get('cliente_id')  # Si el parámetro viene por la URL
+        print("------------")
+        print("get initial")
+        print(proceso_id)
+        print(cliente_id)
+        print("------------")
+       
+        initial['cliente_id']=cliente_id  #cargo el cliente_id del formulario con el valor de parametro en url
+
+        if self.request.method == 'GET':
+            if proceso_id:
+                initial['proceso_id'] = proceso_id
+            else:
+                proc = Procesos(nombre="Pedido")
+                proc.save()
+                initial['proceso_id'] = proc.id
+
+        return initial
+
+    def get_context_data(self, **kwargs):   #arma el array para pasarle de contexto al template
+        context = super().get_context_data(**kwargs)
+        print("==== context")
+        proceso_id = self.kwargs.get('proceso_id')  # Si el parámetro viene por la URL
+        print(proceso_id)
+        cliente_id = self.kwargs.get('cliente_id')  # Si el parámetro viene por la URL
+            
+        p = PedidosTmp.objects.filter(proceso_id=proceso_id).annotate(
+        total=ExpressionWrapper(Func(F('precio') * F('cantidad'), 2, function='round'),
+        output_field=DecimalField(max_digits=12, decimal_places=2))
+        )
+
+        totales = PedidosTmp.objects.filter(proceso_id=proceso_id).aggregate(total=Sum(
+        ExpressionWrapper(Func(F('precio') * F('cantidad'), 2, function='round'), output_field=DecimalField())
+        ))
+        #print(totales.query)
+        #puedo tomar el id del pedido original q estoy editando de cualquier registro, todos lo tienen.
+        pedido_orig_id=p[0].edit_id
+
+
+        cliente = Clientes.objects.get(id=cliente_id)
+
+        print(p.query)
+        context['cliente']= cliente
+        context['datos_adic']= p
+        context['totales']= totales
+        context['form_extra']= GuardarPedidoEditForm(initial={'proceso_id':proceso_id, 'cliente_id':cliente_id})
+        context['pedido_orig_id']= pedido_orig_id
+
+        print(p)
+        print("====")
+
+        return context
+
+    def form_valid(self, form):
+        # Lógica para procesar el formulario y guardar los datos
+        p = form.cleaned_data['producto']
+        cantidad = form.cleaned_data['cantidad']
+
+        ped = PedidosTmp(proceso_id=form.cleaned_data['proceso_id'])
+
+        #print(form.cleaned_data)
+        user=self.request.user
+        datos_usuario = user.datos_usuario.get()
+
+        print( user)
+        ped.fecha         = date.today()
+        ped.cliente_id    = form.cleaned_data['cliente_id']
+        ped.sucursal      = datos_usuario.sucursal
+        ped.codigo        = p.codigo
+        ped.descripcion   = p.descripcion
+        ped.precio        = p.precio
+        ped.costo         = p.costo
+        ped.cantidad      = form.cleaned_data['cantidad']
+        #ped.alicuota_iva  = form.cleaned_data['']
+        ped.rm_realizado  = 0
+        ped.edit_id       = form.cleaned_data['pedido_orig_id']
+        ped.save()
+
+        print("------------")
+        print("VALID")
+        print(form.cleaned_data)
+        print("------------")
+        #En el propio objeto Formview podria guardar todo el form o solo el dato del proceso_id, guardo el dato para poder usarlo en el 
+        # get_success_url porque necesito esos dos datos para armar el url
+        self.proceso_id=form.cleaned_data['proceso_id']
+        self.cliente_id=form.cleaned_data['cliente_id']
+
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        print(form.errors)
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        print("==============")
+        print("SUCESS")
+        print(self.proceso_id)
+        print("==============")
+        return reverse_lazy('cuentascorrientes:entrega_mercaderia_edit_con_proceso_id', kwargs={'proceso_id': self.proceso_id, 'cliente_id': self.cliente_id})
+
+#==================================================================================================
+@login_required
+@require_POST
+def guardar_pedido_edit(request):
+    #este guardar es distinto al del crear un pedido porque es edicion, el pedido esta creado lo que se hace ahora 
+    # es borrar el detalle y poner todo lo que hay en pedidostmp
+    user = request.user
+
+    form = GuardarPedidoEditForm(request.POST)
+    if form.is_valid():
+        print(form.cleaned_data['proceso_id'])
+        print(form.cleaned_data['cliente_id'])
+
+        pedidostmp = PedidosTmp.objects.filter(proceso_id = form.cleaned_data['proceso_id'])
+        pedido_id=pedidostmp[0].edit_id
+
+        with transaction.atomic():
+            #borro todo el detalle y luego inserto lo q hay en pedidostmp
+            pedidos = PedidosDet.objects.filter(pedido_id = pedido_id)
+            pedidos.delete()
+
+
+            detalle_pedido = [
+                PedidosDet(
+                    pedido_id       = pedido_id,
+                    codigo          = pedido.codigo,
+                    descripcion     = pedido.descripcion,
+                    importe_unitario= pedido.precio,
+                    costo           = pedido.costo,
+                    cantidad        = pedido.cantidad,
+                )
+                for pedido in pedidostmp
+            ]
+            
+            PedidosDet.objects.bulk_create(detalle_pedido)
+
+        return redirect('cuentascorrientes:accion_ok', titulo='Pedido Modificado satisfactoriamente')
+    else:
+        print("fuuuck")
+        print(form.errors)
 
 
 

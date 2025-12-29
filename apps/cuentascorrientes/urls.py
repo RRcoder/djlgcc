@@ -2,10 +2,11 @@ from django.urls import path
 from django.views.generic import TemplateView
 from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk
 from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, AccionOk, CtaCteFormView
-from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form
+from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form, guardar_pedido_edit
+from .views import EntregaMercaderiaEditDetFormView
 from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes, informe_pedidos
 
-from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar
+from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar, pedido_editar, tmp_editar, tmp_eliminar
 
 from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir 
 
@@ -25,8 +26,10 @@ urlpatterns = [
     path('cuentascorrientes_block/<int:pk>/', CtaCteBlockFormView.as_view(), name='ctacte_bloquear'),
     path('entregamercaderia/<int:cliente_id>', EntregaMercaderiaDetFormView.as_view(), name='entrega_mercaderia'),
     path('entregamercaderia_form/<int:cliente_id>/<int:proceso_id>', EntregaMercaderiaDetFormView.as_view(), name='entrega_mercaderia_con_proceso_id'),
+    path('entregamercaderiaedit/<int:cliente_id>/<int:proceso_id>', EntregaMercaderiaEditDetFormView.as_view(), name='entrega_mercaderia_edit_con_proceso_id'),
 
     path('guardar_pedido', guardar_pedido, name='guardar_pedido'),
+    path('guardar_pedido_edit', guardar_pedido_edit, name='guardar_pedido_edit'),
     
     path('listado_pedidos_pendientes_form/', listado_pedidos_pendientes_form, name='listado_pedidos_pendientes_form'),
     path('listado_pedidos_pendientes_clie/', listado_pedidos_pendientes_form, name='listado_pedidos_pendientes_clie'),
@@ -46,6 +49,14 @@ urlpatterns = [
 
 
     path('pedido_eliminar/<int:pedido_id>', pedido_eliminar, name='pedido_eliminar'),
+    path('pedido_editar/<int:pedido_id>', pedido_editar, name='pedido_editar'),
+
+
+    path('tmp/editar/', tmp_editar, name='tmp_editar'),
+    path('tmp/eliminar/<int:id>/', tmp_eliminar, name='tmp_eliminar'),
+
+
+
 
 
     # Listado de testeo
