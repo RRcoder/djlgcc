@@ -8,7 +8,7 @@ from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes, 
 
 from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar, pedido_editar, tmp_editar, tmp_eliminar
 
-from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir 
+from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir, listaprecios_imprimir, ingresar_rc 
 
 app_name="cuentascorrientes"
 
@@ -41,7 +41,7 @@ urlpatterns = [
     path('listado_pedidos_entregados', listado_pedidos_entregados, name='listado_pedidos_entregados'),
     path('listado_pedidos_form/', listado_pedidos_form, name='listado_pedidos_form'),
 
-    path('ingresar_pagos_form/', ingresar_pagos_form, name='ingresar_pagos_form'),
+    path('ingresar_pagos_form/<int:cliente_id>', ingresar_pagos_form, name='ingresar_pagos_form'),
 
     path('entregar_pedido/<int:pedido_id>', entregar_pedido, name='entregar_pedido'),
 
@@ -56,6 +56,7 @@ urlpatterns = [
     path('tmp/eliminar/<int:id>/', tmp_eliminar, name='tmp_eliminar'),
 
 
+    path('ingresar_rc', ingresar_rc, name='ingresar_rc'),
 
 
 
@@ -63,6 +64,7 @@ urlpatterns = [
     path('listado_pedidos', listado_pedidos, name='listado_pedidos'),
 
     path("rm_imprimir/<int:remito_id>", rm_imprimir, name="rm_imprimir"),
+    path("listaprecios_imprimir", listaprecios_imprimir, name="listaprecios_imprimir"),
 
 
     path('informe/pedidos_entregados', informe_pedidos, name='informe_pedidos'),

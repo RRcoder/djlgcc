@@ -52,6 +52,9 @@
                             </ul>
                         </div>
                     </td>
+                    <td>
+                    <a href="{% url 'cuentascorrientes:ingresar_pagos_form' cliente_id=item.pk %}" target="blank" class="btn btn-sm btn-primary">Agregar Pago</a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>

@@ -3,9 +3,9 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView, UpdateView, FormView
 from django.urls import reverse_lazy, reverse
-from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet
+from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet, Movimientos
 
-from apps.empresa.models import DatosUsuarios, Comprobantes
+from apps.empresa.models import DatosUsuarios, Comprobantes, TiposComprobante
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm, EntregaMercaderiaEditDetForm
 from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm, GuardarPedidoEditForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -371,7 +371,8 @@ def listado_pedidos(request):
 
 #==================================================================================================
 @login_required
-def ingresar_pagos_form(request):
+def ingresar_pagos_form(request, cliente_id):
+    user = request.user
     if request.method == 'POST':
         print('')
         form = IngresarComprobanteForm(request.POST)
@@ -379,23 +380,34 @@ def ingresar_pagos_form(request):
             print('eerror en el form')
             print(form.errors)
         else:
-            #c = form.cleaned_data['cliente']
             print(form.cleaned_data)
-
-            #contexto = {
-                #'cliente': cliente,
-                #'objects': movimientos,
-                #'suma_total': suma_total
-            #}
-
-            #return render(request, 'cuentascorrientes/listado_pedidos.html', contexto)
+            #pedido= Pedidos.objects.get(id=form.cleaned_data['id_pedido'] )
+            clie= Clientes.objects.get(id=cliente_id )
+            
+            if clie:
+                tipocomprobante= TiposComprobante.objects.filter(nombre=form.cleaned_data['tipo_comprobante']).first()
 
 
-
-
-            ##return render(request, 'formulario_exito.html', {'nombre': nombre})
+                p = Movimientos.objects.create(
+                    cliente          = clie,
+                    tipo_documento   = clie.tipo_documento,
+                    numero_documento = clie.cuit,                # en realidad el campo se deberia llamar nro de documento.
+                    fecomp           = form.cleaned_data['fecha'],
+                    formulario       =  form.cleaned_data['formulario'],
+                    tipocomp         = tipocomprobante.id,               # es un ID integer sin FK por si se borra un comprobante en el tiempo. 
+                    tipocomp_str     = tipocomprobante.nombre,
+                    sucucomp         = form.cleaned_data['punto_venta'], 
+                    nrocomp          = form.cleaned_data['numero_comprobante'], 
+                    importe          = form.cleaned_data['importe_total'], 
+                    importe_iva      = 0,
+                    importe_total    = form.cleaned_data['importe_total'], 
+                    alicuota_iva     = 0,
+                    usuario = user
+                )
+        
+                return redirect('cuentascorrientes:accion_ok', titulo='Movimiento Registrado satisfactoriamente')
     else:
-        form = IngresarComprobanteForm(initial={'id_pedido':13})
+        form = IngresarComprobanteForm(initial={'id_cliente':cliente_id})
         return render(request, 'cuentascorrientes/ingresar_comprobante_form.html', {'form': form})
 
 #==================================================================================================
@@ -729,6 +741,7 @@ def pedido_editar(request, pedido_id):
     return redirect('cuentascorrientes:entrega_mercaderia_edit_con_proceso_id', cliente_id=pedido.cliente_id , proceso_id=proc.id)
 
 
+#==================================================================================================
 @transaction.atomic
 def tmp_editar(request):
     if request.method == 'POST':
@@ -738,6 +751,7 @@ def tmp_editar(request):
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
+#==================================================================================================
 @transaction.atomic
 def tmp_eliminar(request, id):
     tmp = get_object_or_404(PedidosTmp, id=id)
@@ -745,7 +759,7 @@ def tmp_eliminar(request, id):
 
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
-
+#==================================================================================================
 class EntregaMercaderiaEditDetFormView(LoginRequiredMixin, FormView):
     template_name = 'cuentascorrientes/entrega_mercaderia_edit_form.html'
     form_class = EntregaMercaderiaEditDetForm
@@ -895,6 +909,25 @@ def guardar_pedido_edit(request):
         print("fuuuck")
         print(form.errors)
 
+@login_required
+def listaprecios_imprimir(request):
+    objects = ListaPrecios.objects.all()
+
+    print("---...---")
+
+    print(objects)
+
+    return render(request, "cuentascorrientes/listaprecios_imprimir.html", {"objects": objects} )
+
+@login_required
+def ingresar_rc(request):
+    objects = ListaPrecios.objects.all()
+
+    print("---...---")
+
+    print(objects)
+
+    return render(request, "cuentascorrientes/ingresar_rc.html", {"objects": objects} )
 
 
 

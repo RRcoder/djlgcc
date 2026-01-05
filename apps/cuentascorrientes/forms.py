@@ -86,15 +86,23 @@ class ElegirClienteForm(forms.Form):
     cliente = forms.ModelChoiceField(queryset=Clientes.objects.all(), label="Seleccione cliente") 
 
 class IngresarComprobanteForm(forms.Form):
-    id_pedido = forms.IntegerField(widget=forms.HiddenInput())
+    #el form va tener dos hidden el pedido y el cliente. Ahora en dia se va usar solo el cliente
+    # porque el comprob se va generar desde el cliente.
+    # Luego si se desea se podria hacer una opcion rapida para registrar un comprobante desde el pedido que sirva para
+    # indicar q ese pedido ya esta cancelado con un comprobante. por ahora no se usara ese campo.
+
+    #id_pedido = forms.IntegerField(widget=forms.HiddenInput())
+    id_cliente= forms.IntegerField(widget=forms.HiddenInput())
 
     TIPOS_COMPROBANTE = [
         ('FC', 'Factura'),
         ('ND', 'Nota de Débito'),
         ('NC', 'Nota de Crédito'),
+        ('RC', 'Recibo'),
     ]
 
     FORMULARIOS = [
+        (' ', 'Vacio'),
         ('A', 'A'),
         ('B', 'B'),
         ('C', 'C'),
@@ -104,8 +112,8 @@ class IngresarComprobanteForm(forms.Form):
     fecha = forms.DateField( label='Fecha del comprobante', widget=forms.DateInput(attrs={'type': 'date'}) )
     tipo_comprobante = forms.ChoiceField( choices=TIPOS_COMPROBANTE, label='Tipo de Comprobante' )
     formulario = forms.ChoiceField( choices=FORMULARIOS, label='Tipo (Letra)')
-    punto_venta = forms.IntegerField(label='Punto de Venta' )
-    numero_comprobante = forms.IntegerField(label='Nro de Comprobante')
+    punto_venta = forms.IntegerField(label='Punto de Venta', widget=forms.NumberInput(attrs={'min': 1, 'max': 99999}))
+    numero_comprobante = forms.IntegerField(label='Nro de Comprobante', widget=forms.NumberInput(attrs={'min': 1, 'max': 99999999}))
     importe_total = forms.DecimalField( label='Importe', max_digits=12, decimal_places=2)
     #iva = forms.DecimalField( label='IVA', max_digits=10, decimal_places=2    )
 

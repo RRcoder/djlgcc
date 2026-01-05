@@ -216,6 +216,7 @@ class Movimientos(models.Model):
     fecomp           = models.DateField()
     formulario       = models.CharField(max_length=10, null=True, blank=True)
     tipocomp         = models.IntegerField()  
+    tipocomp_str     = models.CharField(max_length=10, null=True, blank=True) # por si acaso se borran reg en la tabla tiposcomprobante tb grabo aca el nombre.
     sucucomp         = models.IntegerField() 
     nrocomp          = models.IntegerField() 
     importe          = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)  
@@ -224,6 +225,7 @@ class Movimientos(models.Model):
     alicuota_iva     = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)    
     updated          = models.DateTimeField(auto_now=True)
     created          = models.DateTimeField(auto_now_add=True)
+    usuario          = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
 
 
 class TiposDocumento(models.Model):
