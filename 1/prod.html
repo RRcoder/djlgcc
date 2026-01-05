@@ -1,0 +1,27 @@
+table = $('#tablaClientes').DataTable({
+    ajax: {
+        url: '/clientes/list',
+        type: 'GET',
+        dataSrc: '' // MUY IMPORTANTE
+    },
+    columns: [
+        { data: 'id' },
+        { data: 'nombre' },
+        { data: 'numero_documento' },
+        {
+            data: null,
+            orderable: false,
+            searchable: false,
+            render: data => `
+                <button class="btn btn-success btn-sm seleccionar"
+                        data-id="${data.id}"
+                        data-nombre="${data.nombre}">
+                    Seleccionar
+                </button>`
+        }
+    ],
+    pageLength: 10,
+    autoWidth: false,
+    orderCellsTop: true
+});
+
