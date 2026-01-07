@@ -95,9 +95,6 @@ class IngresarComprobanteForm(forms.Form):
     id_cliente= forms.IntegerField(widget=forms.HiddenInput())
 
     TIPOS_COMPROBANTE = [
-        ('FC', 'Factura'),
-        ('ND', 'Nota de Débito'),
-        ('NC', 'Nota de Crédito'),
         ('RC', 'Recibo'),
     ]
 
