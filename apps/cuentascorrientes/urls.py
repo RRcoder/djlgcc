@@ -8,7 +8,7 @@ from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes, 
 
 from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar, pedido_editar, tmp_editar, tmp_eliminar
 
-from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir, listaprecios_imprimir, ingresar_rc 
+from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir, listaprecios_imprimir, ingresar_rc, cc 
 
 app_name="cuentascorrientes"
 
@@ -69,6 +69,7 @@ urlpatterns = [
 
     path('informe/pedidos_entregados', informe_pedidos, name='informe_pedidos'),
 
+    path('informe/cc', cc, name="cc"),
 
 
     ]
