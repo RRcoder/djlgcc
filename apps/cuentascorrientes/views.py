@@ -932,4 +932,80 @@ def ingresar_rc(request):
 
 
 
+@login_required
+def ctacte_form(request):
+    resultados = None
+
+    if request.method == "POST":
+        form = CtacteForm(request.POST)
+        if form.is_valid():
+            fecha_desde = form.cleaned_data["fecha_desde"]
+            fecha_hasta = form.cleaned_data["fecha_hasta"]
+
+            # 👉 Acá normalmente filtrarías una queryset
+            # Ejemplo:
+            # resultados = Movimiento.objects.filter(
+            #     fecha__range=(fecha_desde, fecha_hasta)
+            # )
+
+            # Por ahora devolvemos los valores para mostrar
+            resultados = {
+                "desde": fecha_desde,
+                "hasta": fecha_hasta,
+            }
+    else:
+        form = CtacteForm()
+
+    context = {
+        "form": form,
+        "resultados": resultados
+    }
+    return render(request, "ctacte_form.html", context)
+
+
+
+#<!DOCTYPE html>
+#<html lang="es">
+#<head>
+    #<meta charset="UTF-8">
+    #<title>Cuenta Corriente</title>
+#</head>
+#<body>
+
+#<h1>Consulta de Cuenta Corriente</h1>
+
+#<form method="post">
+    #{% csrf_token %}
+
+    #<div>
+        #{{ form.fecha_desde.label_tag }}
+        #{{ form.fecha_desde }}
+        #{{ form.fecha_desde.errors }}
+    #</div>
+
+    #<div>
+        #{{ form.fecha_hasta.label_tag }}
+        #{{ form.fecha_hasta }}
+        #{{ form.fecha_hasta.errors }}
+    #</div>
+
+    #{% if form.non_field_errors %}
+        #<div style="color:red;">
+            #{{ form.non_field_errors }}
+        #</div>
+    #{% endif %}
+
+    #<button type="submit">Consultar</button>
+#</form>
+
+#{% if resultados %}
+    #<hr>
+    #<h2>Resultado</h2>
+    #<p>Fecha desde: {{ resultados.desde }}</p>
+    #<p>Fecha hasta: {{ resultados.hasta }}</p>
+#{% endif %}
+
+#</body>
+#</html>
+
 

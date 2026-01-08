@@ -127,5 +127,9 @@ class AgregarMercaderiaForm(forms.Form):
     cantidad = forms.DecimalField() 
     item_id = forms.CharField(widget=forms.HiddenInput(),  label="")
 
+class CtacteForm(forms.Form):
+    #cliente = 
+    fecha_desde = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Desde')
+    fecha_hasta = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Hasta')
 
 
