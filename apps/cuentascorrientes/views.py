@@ -20,6 +20,9 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
+
+from django.db import connection  #para consultas directas
+
 from datetime import date
 
 #==================================================================================================
@@ -930,8 +933,6 @@ def ingresar_rc(request):
     return render(request, "cuentascorrientes/ingresar_rc.html", {"objects": objects} )
 
 
-
-
 @login_required
 def ctacte_form(request):
     resultados = None
@@ -1008,4 +1009,80 @@ def ctacte_form(request):
 #</body>
 #</html>
 
+@login_required
+def cc(request):
+
+    context=cuenta_corriente_cliente(7)
+
+    print(context)
+    return
+
+def cuenta_corriente_cliente(cliente_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                cliente_id,
+                fecha,
+                tipo,
+                comprobante,
+                debe,
+                haber,
+                @saldo := IF(@cliente = cliente_id,
+                             @saldo + debe - haber,
+                             debe - haber) AS saldo,
+                @cliente := cliente_id AS dummy
+            FROM (
+                SELECT
+                    cliente_id,
+                    fecha,
+                    tipo,
+                    comprobante,
+                    debe,
+                    haber
+                FROM (
+                    SELECT
+                        r.cliente_id,
+                        r.fecha,
+                        'RM' AS tipo,
+                        CONCAT(
+                            'RTO ',
+                            LPAD(r.punto_de_venta, 5, '0'),
+                            '-',
+                            LPAD(r.numero, 8, '0')
+                        ) AS comprobante,
+                        SUM(d.importe_unitario * d.cantidad) AS debe,
+                        0 AS haber
+                    FROM cuentascorrientes_remitos r
+                    JOIN cuentascorrientes_remitosdet d ON d.remito_id = r.id
+                    WHERE r.cliente_id = %s
+                    GROUP BY r.id, r.cliente_id, r.fecha, r.punto_de_venta, r.numero
+
+                    UNION ALL
+
+                    SELECT
+                        m.cliente_id,
+                        m.fecomp AS fecha,
+                        'RC' AS tipo,
+                        CONCAT(
+                            'RC ',
+                            LPAD(m.sucucomp, 5, '0'),
+                            '-',
+                            LPAD(m.nrocomp, 8, '0')
+                        ) AS comprobante,
+                        0 AS debe,
+                        m.importe_total AS haber
+                    FROM cuentascorrientes_movimientos m
+                    WHERE m.cliente_id = %s
+                ) u
+                ORDER BY
+                    cliente_id,
+                    fecha,
+                    CASE tipo WHEN 'RM' THEN 1 ELSE 2 END,
+                    comprobante
+            ) t
+            CROSS JOIN (SELECT @saldo := 0, @cliente := NULL) vars;
+        """, [cliente_id, cliente_id])
+
+        columns = [col[0] for col in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
