@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cuenta Corriente</title>
+</head>
+<body>
+
+<h1>Consulta de Cuenta Corriente</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div>
+        {{ form.fecha_desde.label_tag }}
+        {{ form.fecha_desde }}
+        {{ form.fecha_desde.errors }}
+    </div>
+
+    <div>
+        {{ form.fecha_hasta.label_tag }}
+        {{ form.fecha_hasta }}
+        {{ form.fecha_hasta.errors }}
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="color:red;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <button type="submit">Consultar</button>
+</form>
+
+{% if resultados %}
+    <hr>
+    <h2>Resultado</h2>
+    <p>Fecha desde: {{ resultados.desde }}</p>
+    <p>Fecha hasta: {{ resultados.hasta }}</p>
+{% endif %}
+
+</body>
+</html>
