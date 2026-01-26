@@ -132,4 +132,29 @@ class CtacteForm(forms.Form):
     fecha_desde = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Desde')
     fecha_hasta = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Hasta')
 
+class IngresaDevolucionRMForm(forms.Form):
+    #cliente = 
+    id_cliente= forms.IntegerField(widget=forms.HiddenInput())
+
+    TIPOS_COMPROBANTE = [
+        ('RD', 'Devolucion RTO'),
+    ]
+
+    FORMULARIOS = [
+        (' ', 'Vacio'),
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+    ]
+
+    fecha = forms.DateField( label='Fecha del comprobante', widget=forms.DateInput(attrs={'type': 'date'}) )
+    tipo_comprobante = forms.ChoiceField( choices=TIPOS_COMPROBANTE, label='Tipo de Comprobante' )
+    formulario = forms.ChoiceField( choices=FORMULARIOS, label='Tipo (Letra)')
+    punto_venta = forms.IntegerField(label='Punto de Venta', widget=forms.NumberInput(attrs={'min': 1, 'max': 99999}))
+    numero_comprobante = forms.IntegerField(label='Nro de Comprobante', widget=forms.NumberInput(attrs={'min': 1, 'max': 99999999}))
+    importe_total = forms.DecimalField( label='Importe', max_digits=12, decimal_places=2)
+
+
+
+
 

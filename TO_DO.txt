@@ -12,5 +12,19 @@ LISTO  -> Lista de precios, cambiar precios de forma excepcional
 Cargar RC
 
 
+Anular pedido entregado con NC
+
+Permitir cambiar precio cuando se hace el RM
+
+imprimir lista
+
+LISTO -> RM en una sola hoja cuando los items son pocos, asi salen dos RM en una hoja.
+
+Listado pendientes por clie para enviar por WA 
+
+
+Cuando se le facturo al cliente en rango de fecha
+
+Aplicaciones entre RM y RC
 
 

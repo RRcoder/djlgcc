@@ -1,0 +1,50 @@
+  <div class="fila">
+    <div class="mitad">
+     <h3> Carnicería LG </h3>
+        Sócrates 2647<br>
+        Tel: 291 4736193<br>
+    </div>
+    <div class="mitad">
+      <div class="encabezado">
+          <h2>RTO {{ remito.punto_de_venta|stringformat:"05d"}}-{{ remito.numero|stringformat:"08d"}}</h2>
+        <p>Fecha: {{ remito.fecha|date:"d/m/Y" }}</p>
+      </div>
+
+    </div>
+
+  </div>
+  <br>
+
+  <b>Cliente: </b>{{ remito.cliente}} <br>
+  {{ remito.cliente.get_domicilio}} <br>
+  {{ remito.cliente.get_localidad_provincia }} <br>
+
+  <table class="detalle">
+    <thead>
+        <tr>
+            <th style="width:50%; text-align:left;">Descripción</th>
+            <th style="text-align:right;">Cantidad</th>
+            <th style="text-align:right;">Precio unitario</th>
+            <th style="text-align:right;">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+      {% for item in objects_det %}
+      <tr>
+        <td>{{ item.codigo }} {{ item.descripcion }}</td>
+        <td style="text-align:right;">{{ item.cantidad }}</td>
+        <td style="text-align:right;">{{ item.importe_unitario }}</td>
+        <td style="text-align:right;">{{ item.total|floatformat:2}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p style="text-align:right;font-weight: bold;">Total: ${{ remito.total_general|floatformat:2 }}</p>
+
+
+
+  <div class="firma_div">
+      Firma: ..................................................
+  </div>
+

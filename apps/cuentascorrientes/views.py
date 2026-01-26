@@ -6,7 +6,7 @@ from django.urls import reverse_lazy, reverse
 from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet, Movimientos
 
 from apps.empresa.models import DatosUsuarios, Comprobantes, TiposComprobante
-from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm, EntregaMercaderiaEditDetForm
+from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm, EntregaMercaderiaEditDetForm, CtacteForm
 from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm, GuardarPedidoEditForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField, Count
@@ -620,29 +620,16 @@ def rm_imprimir(request, remito_id):
             )
         )
     ).get(id=remito_id)
-    #.annotate(
-        #total=Sum(
-            #ExpressionWrapper(
-                #F('remitosdet__importe_unitario')  * F('remitosdet__cantidad'),
-                #output_field=DecimalField(max_digits=14, decimal_places=2)
-            #)
-        #),
-        #comprobante=Concat(
-        #Value('RM '),
-        #Cast('punto_de_venta', CharField()),
-        #Value('-'),
-        #Cast('numero', CharField())
-    #)
-    #).order_by('fecha','punto_de_venta', 'numero')
+
+    objects_det = comprobante.detalles.all()
+    cant_detalles = objects_det.count()
 
     print("))))))))))))))))))))))")
     print(comprobante)
 
     print(    comprobante.detalles.all())
 
-
-    #remito = get_object_or_404(Remitos, pk=remito_id)
-    return render(request, "cuentascorrientes/rm_imprimir.html", {"remito": comprobante, 'objects_det': comprobante.detalles.all()})
+    return render(request, "cuentascorrientes/rm_imprimir.html", {"remito": comprobante, 'objects_det': objects_det, 'cant_detalles': cant_detalles})
 
 #==================================================================================================
 @login_required
@@ -943,16 +930,15 @@ def ctacte_form(request):
             fecha_desde = form.cleaned_data["fecha_desde"]
             fecha_hasta = form.cleaned_data["fecha_hasta"]
 
-            # 👉 Acá normalmente filtrarías una queryset
-            # Ejemplo:
-            # resultados = Movimiento.objects.filter(
-            #     fecha__range=(fecha_desde, fecha_hasta)
-            # )
+            lll=cuenta_corriente_cliente(7)
+            print("------------------------")
+            print(lll)
 
             # Por ahora devolvemos los valores para mostrar
             resultados = {
                 "desde": fecha_desde,
                 "hasta": fecha_hasta,
+                "object_list" : lll
             }
     else:
         form = CtacteForm()
@@ -961,53 +947,8 @@ def ctacte_form(request):
         "form": form,
         "resultados": resultados
     }
-    return render(request, "ctacte_form.html", context)
+    return render(request, "cuentascorrientes/ctacte_informe_form.html", context)
 
-
-
-#<!DOCTYPE html>
-#<html lang="es">
-#<head>
-    #<meta charset="UTF-8">
-    #<title>Cuenta Corriente</title>
-#</head>
-#<body>
-
-#<h1>Consulta de Cuenta Corriente</h1>
-
-#<form method="post">
-    #{% csrf_token %}
-
-    #<div>
-        #{{ form.fecha_desde.label_tag }}
-        #{{ form.fecha_desde }}
-        #{{ form.fecha_desde.errors }}
-    #</div>
-
-    #<div>
-        #{{ form.fecha_hasta.label_tag }}
-        #{{ form.fecha_hasta }}
-        #{{ form.fecha_hasta.errors }}
-    #</div>
-
-    #{% if form.non_field_errors %}
-        #<div style="color:red;">
-            #{{ form.non_field_errors }}
-        #</div>
-    #{% endif %}
-
-    #<button type="submit">Consultar</button>
-#</form>
-
-#{% if resultados %}
-    #<hr>
-    #<h2>Resultado</h2>
-    #<p>Fecha desde: {{ resultados.desde }}</p>
-    #<p>Fecha hasta: {{ resultados.hasta }}</p>
-#{% endif %}
-
-#</body>
-#</html>
 
 @login_required
 def cc(request):
@@ -1017,7 +958,7 @@ def cc(request):
     print(context)
     return
 
-def cuenta_corriente_cliente(cliente_id):
+def cuenta_corriente_cliente(cliente_id, fedesde, fehasta):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT

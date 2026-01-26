@@ -5,85 +5,111 @@
   <title></title>
   <style>
     @media print {
-      @page { margin: 20mm; }
-      body { font-family: Arial, sans-serif; font-size: 12pt; }
-      .no-print { display: none; }
+        @page { margin: 0; }
+        html, body { font-family: Arial, sans-serif; font-size: 12pt;
+            height: 297mm;
+        }
+        body { 
+            margin:0;
+            padding:0;
+        }
+
+        .no-print { display: none; }
+
+        .pagina {
+            height: 297mm;
+            page-break-after: always;
+        }
+        .remito.mitad {
+            box-sizing: border-box;
+            min-height: 145mm;
+            height: 145mm;       /* media hoja */
+            padding: 10mm 10mm 25mm 10mm;
+            border: 1px solid #000; /* solo para que se vea el div */
+        }
+
+        .remito.completo {
+            height: 287mm;       /* hoja completa (297 - margen de seguridad) */
+            padding: 15mm 15mm 25mm 15mm;
+        }
+        .firma_div {
+            border: 1px solid #000;
+            padding-bottom: 10mm; 
+            right: 15mm;
+            text-align: right;
+        }
     }
+
+        html, body { font-family: Arial, sans-serif; font-size: 12pt;
+            height: 297mm;
+        }
+    body {
+        margin:0;
+        padding:0;
+    }
+
     .encabezado { text-align: center; font-weight: bold; margin-bottom: 20px; }
     .detalle { border-collapse: collapse; width: 100%; }
     .detalle th { border-bottom: 1px solid #000; padding: 5px; }
-    .detalle td { border: 0px solid #000; padding: 2px; }
+    .detalle td { border: 0px solid #000; padding: 1px; font-size:10pt;}
 
 
     .fila { display: flex; width: 100%; }
     .mitad {
-    flex: 1;              /* cada div toma el mismo espacio disponible */
-    padding: 10px;        /* opcional, para separar contenido del borde */
-    box-sizing: border-box; /* asegura que padding no rompa el ancho */
-    border: 1px solid #000; /* solo para que se vea el div */
+        flex: 1;              /* cada div toma el mismo espacio disponible */
+        padding: 10px;        /* opcional, para separar contenido del borde */
+        box-sizing: border-box; /* asegura que padding no rompa el ancho */
+        border: 1px solid #000; /* solo para que se vea el div */
     }
+
     .firma_div {
-        margin-top: 130px;
+        position: relative;
+        bottom: 0; 
+        right: 15mm;
         text-align: right;
-        padding-right: 40px;
     }
+    .mitad-hoja {
+        height: 49%;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+    }
+
+
+
+
+
   </style>
 </head>
 <body>
-  <div class="no-print">
-    <button onclick="window.print()">🖨️ Imprimir</button>
-  </div>
-
-  <div class="fila">
-    <div class="mitad">
- <h3>
- Carnicería LG
- </h3>
-        Sócrates 2647<br>
-        Tel: 291 4736193<br>
+    <div class="no-print">
+        <button onclick="window.print()">🖨️ Imprimir</button>
     </div>
-    <div class="mitad">
-      <div class="encabezado">
-          <h2>RTO {{ remito.punto_de_venta|stringformat:"05d"}}-{{ remito.numero|stringformat:"08d"}}</h2>
-        <p>Fecha: {{ remito.fecha|date:"d/m/Y" }}</p>
+
+  {% if cant_detalles < 10 %}
+      <!-- PRIMER REMITO -->
+
+      <div class="pagina">
+
+
+      <div class="remito mitad">
+          {% include "cuentascorrientes/rm_imprimir_contenido.html" %}
       </div>
 
-    </div>
-
-  </div>
-  <br>
-
-  <b>Cliente: </b>{{ remito.cliente}} <br>
-  {{ remito.cliente.get_domicilio}} <br>
-  {{ remito.cliente.get_localidad_provincia }} <br>
-
-  <table class="detalle">
-    <thead>
-        <tr>
-            <th style="width:50%; text-align:left;">Descripción</th>
-            <th style="text-align:right;">Cantidad</th>
-            <th style="text-align:right;">Precio unitario</th>
-            <th style="text-align:right;">Total</th>
-        </tr>
-    </thead>
-    <tbody>
-      {% for item in objects_det %}
-      <tr>
-        <td>{{ item.codigo }} {{ item.descripcion }}</td>
-        <td style="text-align:right;">{{ item.cantidad }}</td>
-        <td style="text-align:right;">{{ item.importe_unitario }}</td>
-        <td style="text-align:right;">{{ item.total|floatformat:2}}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <p style="text-align:right;font-weight: bold;">Total: ${{ remito.total_general|floatformat:2 }}</p>
+      <!-- SEGUNDO REMITO (COPIA) -->
+      <div class="remito mitad">
+          {% include "cuentascorrientes/rm_imprimir_contenido.html" %}
+      </div>
+      </div>
+  {% else %}
+      <!-- REMITO NORMAL -->
+      <div class="pagina">
+      <div class="remito completo">
+          {% include "cuentascorrientes/rm_imprimir_contenido.html" %}
+      </div>
+      </div>
+  {% endif %}
 
 
 
-  <div class="firma_div">
-      Firma: ..................................................
-  </div>
 </body>
 </html>
