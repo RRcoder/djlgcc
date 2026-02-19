@@ -58,6 +58,10 @@ class ListaPreciosUpdateView(LoginRequiredMixin, UpdateView):
 @login_required
 def AccionOk(request, titulo):
     return render(request, 'cuentascorrientes/accion_ok.html', context={'titulo':titulo})
+#==================================================================================================
+@login_required
+def AccionError(request, titulo):
+    return render(request, 'cuentascorrientes/accion_error.html', context={'titulo':titulo})
 
 #==================================================================================================
 class ClientesListView(LoginRequiredMixin, ListView):
@@ -898,7 +902,7 @@ def guardar_pedido_edit(request):
     else:
         print("fuuuck")
         print(form.errors)
-
+#==================================================================================================
 @login_required
 def listaprecios_imprimir(request):
     objects = ListaPrecios.objects.all()
@@ -909,6 +913,7 @@ def listaprecios_imprimir(request):
 
     return render(request, "cuentascorrientes/listaprecios_imprimir.html", {"objects": objects} )
 
+#==================================================================================================
 @login_required
 def ingresar_rc(request):
     objects = ListaPrecios.objects.all()
@@ -919,9 +924,9 @@ def ingresar_rc(request):
 
     return render(request, "cuentascorrientes/ingresar_rc.html", {"objects": objects} )
 
-
+#==================================================================================================
 @login_required
-def ctacte_form(request):
+def ctacte_informe_form(request):
     resultados = None
 
     if request.method == "POST":
@@ -930,26 +935,26 @@ def ctacte_form(request):
             fecha_desde = form.cleaned_data["fecha_desde"]
             fecha_hasta = form.cleaned_data["fecha_hasta"]
 
-            lll=cuenta_corriente_cliente(7)
+            cliente_id=7
+            lll=cuenta_corriente_cliente(cliente_id, fecha_desde, fecha_hasta)
             print("------------------------")
             print(lll)
 
             # Por ahora devolvemos los valores para mostrar
             resultados = {
+                "cliente_id": cliente_id,
                 "desde": fecha_desde,
                 "hasta": fecha_hasta,
                 "object_list" : lll
             }
+            return render(request, "cuentascorrientes/ctacte_informe_resultado.html", resultados)
     else:
         form = CtacteForm()
 
-    context = {
-        "form": form,
-        "resultados": resultados
-    }
+        context = {"form": form}
     return render(request, "cuentascorrientes/ctacte_informe_form.html", context)
 
-
+#==================================================================================================
 @login_required
 def cc(request):
 
@@ -958,6 +963,7 @@ def cc(request):
     print(context)
     return
 
+#==================================================================================================
 def cuenta_corriente_cliente(cliente_id, fedesde, fehasta):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -1026,4 +1032,121 @@ def cuenta_corriente_cliente(cliente_id, fedesde, fehasta):
 
         columns = [col[0] for col in cursor.description]
         return [dict(zip(columns, row)) for row in cursor.fetchall()]
+#==================================================================================================
+@login_required
+@transaction.atomic
+def nc_devolucion(request, remito_id):
+    remito = get_object_or_404(Remitos.objects.prefetch_related('detalles'), pk=remito_id)
+
+    # Calcular total del remito
+    total = sum(det.total for det in remito.detalles.all())
+    
+    puntos_venta = Comprobantes.objects.filter(sucursal_id=1, comprobante_id=3).values_list('punto_de_venta', flat=True)
+    
+    if remito.estado==5: # ya esta devuelto no puedo devolver de nuevo.
+        return redirect('cuentascorrientes:accion_error', titulo='El RTO ya esta devuelto, no se puede devolver dos veces el mismo comprobante.')
+
+    if request.method == "POST":
+        if "confirmar" in request.POST:
+            tipocomprobante= TiposComprobante.objects.filter(nombre='NC').first()
+            if tipocomprobante == None:
+                return redirect('cuentascorrientes:accion_error', titulo='El comprobante NC no esta configurado. Comuniquese con el admin.')
+                
+            print(request.POST)
+            Movimientos.objects.create(
+                cliente=remito.cliente,
+                tipo_documento=remito.cliente.tipo_documento,
+                numero_documento=remito.cliente.cuit,
+                fecomp=request.POST['fecomp'],
+                formulario= request.POST['formulario'],
+                tipocomp=tipocomprobante.id,  # ejemplo: 3 = Nota de Crédito
+                tipocomp_str=tipocomprobante.nombre,
+                sucucomp= request.POST['punto_venta'],
+                nrocomp=request.POST['nrocomp'],
+                importe=total,
+                importe_iva=0,
+                importe_total=total,
+                alicuota_iva=0,
+                usuario=request.user,
+                comprob_asoc = remito.id   #indica a que comprobante reversa.
+            )
+            # tengo q marcar q ese RM esta devuelto por esta NC y que apunte.
+            remito.estado=5
+            remito.save()
+
+            messages.success(request, "Nota de Crédito generada correctamente.")
+            return #redirect("remitos_detail", pk=remito.pk)
+
+        return redirect("cuentascorrientes:listado_pedidos_entregados")
+
+    context = {
+        "puntos_venta": puntos_venta,
+        "remito": remito,
+        "detalles": remito.detalles.all(),
+        "total": total,
+    }
+
+    return render(request, "cuentascorrientes/nc_devolucion.html", context)
+
+
+    print(context)
+    return
+
+#==================================================================================================
+# views.py
+from django.db.models.functions import Coalesce
+from .forms import InformeRemitosForm
+
+def informe_remitos_form(request):
+    form = InformeRemitosForm()
+    return render(request, 'cuentascorrientes/informe_remitos_form.html', {'form': form})
+#==================================================================================================
+def informe_remitos_resultado(request):
+    form = InformeRemitosForm(request.GET or None)
+
+    remitos = []
+    total_general = 0
+
+    if form.is_valid():
+        fecha_desde = form.cleaned_data['fecha_desde']
+        fecha_hasta = form.cleaned_data['fecha_hasta']
+        cliente = form.cleaned_data['cliente']
+
+        total_expr = ExpressionWrapper(
+            F('detalles__importe_unitario') * F('detalles__cantidad'),
+            output_field=DecimalField()
+        )
+
+        remitos = Remitos.objects.filter(
+            fecha__range=(fecha_desde, fecha_hasta)
+        ).exclude(
+            estado=5
+        )
+
+        if cliente:
+            remitos = remitos.filter(cliente=cliente)
+
+        remitos = remitos.annotate(
+            importe_total=Coalesce(Sum(total_expr), 0)
+        )
+
+        total_general = remitos.aggregate(
+            total=Coalesce(Sum('importe_total'), 0)
+        )['total']
+
+    context = {
+        'form': form,
+        'remitos': remitos,
+        'total_general': total_general
+    }
+
+    return render(request, 'cuentascorrientes/informe_remitos_resultado.html', context)
+
+#==================================================================================================
+#==================================================================================================
+
+
+
+
+
 

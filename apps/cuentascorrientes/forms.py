@@ -1,5 +1,6 @@
 from django import forms
 from .models import ListaPrecios, Clientes
+from django.core.exceptions import ValidationError
 
 class ListaPreciosForm(forms.ModelForm):
     class Meta:
@@ -128,9 +129,31 @@ class AgregarMercaderiaForm(forms.Form):
     item_id = forms.CharField(widget=forms.HiddenInput(),  label="")
 
 class CtacteForm(forms.Form):
-    #cliente = 
-    fecha_desde = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Desde')
-    fecha_hasta = forms.DateField(widget=forms.SelectDateWidget(years=range(2020, 2031)), required=True, label='Fecha Hasta')
+    fecha_desde = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        required=True,
+        label='Fecha Desde'
+    )
+
+    fecha_hasta = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control' }),
+        required=True,
+        label='Fecha Hasta'
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        fecha_desde = cleaned_data.get("fecha_desde")
+        fecha_hasta = cleaned_data.get("fecha_hasta")
+
+        if fecha_desde and fecha_hasta:
+            if fecha_hasta <= fecha_desde:
+                raise ValidationError("La Fecha Hasta debe ser mayor que la Fecha Desde.")
+
+        return cleaned_data
+
+
+
 
 class IngresaDevolucionRMForm(forms.Form):
     #cliente = 
@@ -155,6 +178,18 @@ class IngresaDevolucionRMForm(forms.Form):
     importe_total = forms.DecimalField( label='Importe', max_digits=12, decimal_places=2)
 
 
+class InformeRemitosForm(forms.Form):
+    fecha_desde = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    fecha_hasta = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    cliente = forms.ModelChoiceField(
+        queryset=Clientes.objects.all().order_by('nombre'),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False
+    )
 
 
 

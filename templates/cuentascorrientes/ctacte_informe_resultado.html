@@ -2,47 +2,13 @@
 {% block content %}
 <div class="container-fluid">
 
-<h1>Consulta de Cuenta Corriente</h1>
+<h1>Cuenta Corriente</h1>
 
-<form method="post">
-    {% csrf_token %}
-    
 
-    <div class="row">
-    <div class="col-4">
-        {{ form.fecha_desde.label_tag }}
-        {{ form.fecha_desde }}
-        {{ form.fecha_desde.errors }}
-    </div>
-    </div>
-
-    <div class="row">
-    <div class="col-4">
-        {{ form.fecha_hasta.label_tag }}
-        {{ form.fecha_hasta }}
-        {{ form.fecha_hasta.errors }}
-    </div>
-    </div>
-
-    {% if form.non_field_errors %}
-        <div style="color:red;">
-            {{ form.non_field_errors }}
-        </div>
-    {% endif %}
-
-    <div class="row">
-    <div class="col-4">
-    <br>
-    <button type="submit" class="btn btn-primary">Consultar</button>
-    </div>
-    </div>
-</form>
-
-{% if resultados %}
     <hr>
-    <h2>Resultado</h2>
-    <p>Fecha desde: {{ resultados.desde }}</p>
-    <p>Fecha hasta: {{ resultados.hasta }}</p>
+    <p>Cliente: {{ cliente_id }} <br>
+    Fecha desde: {{ desde }}<br>
+    Fecha hasta: {{ hasta }}</p>
 
     <table class="table table-bordered table-sm">
         <thead>
@@ -56,7 +22,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for r in resultados.object_list %}
+            {% for r in object_list %}
                 <tr>
                     <td>{{ r.fecha|date:'d/m/Y' }}</td>
                     <td>{{ r.comprobante }}</td>
@@ -84,7 +50,6 @@
 
 
 
-{% endif %}
 
 </div>
 {% endblock %}

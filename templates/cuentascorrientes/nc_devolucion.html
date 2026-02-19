@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+            <h5>Devolución de Remito</h5>
+        </div>
+
+        <div class="card-body">
+
+            <!-- CABECERA -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <strong>Remito:</strong><br>
+                    {{ remito }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Fecha:</strong><br>
+                    {{ remito.fecha }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Cliente:</strong><br>
+                    {{ remito.cliente }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Sucursal:</strong><br>
+                    {{ remito.sucursal }}
+                </div>
+            </div>
+
+            <!-- DETALLE -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción</th>
+                            <th class="text-end">Cantidad</th>
+                            <th class="text-end">P.Unit</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for det in detalles %}
+                        <tr>
+                            <td>{{ det.codigo }}</td>
+                            <td>{{ det.descripcion }}</td>
+                            <td class="text-end">{{ det.cantidad }}</td>
+                            <td class="text-end">{{ det.importe_unitario }}</td>
+                            <td class="text-end">{{ det.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-secondary">
+                            <th colspan="4" class="text-end">TOTAL REMITO</th>
+                            <th class="text-end">{{ total }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- CONFIRMACION -->
+            <form method="post" class="mt-4">
+                {% csrf_token %}
+                <div class="alert alert-warning text-center">
+                    <h5>¿Confirma devolver esta mercadería?</h5>
+                </div>
+
+                <!-- NUEVOS CAMPOS -->
+                <div class="row mb-3">
+                    <h3>Ingrese los datos de la NC</h3>		
+                    <!-- Formulario -->
+                    <div class="col-md-4">
+                        <label class="form-label">Formulario</label>
+                        <select name="formulario" class="form-select">
+                            <option value="">Seleccione</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                    </div>
+
+                    <!-- Punto de Venta -->
+                    <div class="col-md-4">
+                        <label class="form-label">Punto de Venta</label>
+                        <select name="punto_venta" class="form-select" required>
+                            <option value="">---------</option>
+                            {% for pv in puntos_venta %}
+                                <option value="{{ pv }}">{{ pv }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Numero Comprobante -->
+                    <div class="col-md-4">
+                        <label class="form-label">Número de Comprobante</label>
+                        <input type="number"
+                               name="nrocomp"
+                               class="form-control"
+                               required>
+                    </div>
+
+
+                </div>
+               
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Fecha del comprobante</label>
+                        <input type="date" name="fecomp" class="form-control" required="" id="id_fecomp">
+                    </div>
+                </div>
+
+
+                <div class="text-center">
+                    <button type="submit" name="confirmar" class="btn btn-danger me-2">
+                        Confirmar
+                    </button>
+                    <a href="{% url 'cuentascorrientes:listado_pedidos_entregados' %}" class="btn btn-secondary">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+

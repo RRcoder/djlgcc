@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h3>Resultado Informe de Remitos</h3>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Remito</th>
+                    <th>Cliente</th>
+                    <th>Bultos</th>
+                    <th>Peso</th>
+                    <th class="text-end">Importe Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in remitos %}
+                <tr>
+                    <td>{{ r.fecha|date:"d/m/Y" }}</td>
+                    <td>{{ r }}</td>
+                    <td>{{ r.cliente }}</td>
+                    <td>{{ r.bultos }}</td>
+                    <td>{{ r.pesoaprox }}</td>
+                    <td class="text-end fw-bold">
+                        $ {{ r.importe_total|floatformat:2 }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        No hay resultados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-secondary">
+                    <th colspan="5" class="text-end">TOTAL GENERAL</th>
+                    <th class="text-end fs-5">
+                        $ {{ total_general|floatformat:2 }}
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+

@@ -29,7 +29,7 @@
                     <td class="text-end">{{ r.total_importe }}</td>
                     <td>
                     <a href="{% url 'cuentascorrientes:rm_imprimir' remito_id=r.rm_asociado.id %}" target="blank" class="btn btn-sm btn-primary">Imprimir</a>
-                    <a href="{% url 'cuentascorrientes:rm_imprimir' remito_id=r.rm_asociado.id %}" target="blank" class="btn btn-sm btn-primary">NC Devolución</a>
+                    <a href="{% url 'cuentascorrientes:nc_devolucion' remito_id=r.rm_asociado.id %}" target="blank" class="btn btn-sm btn-primary">NC Devolución</a>
                     </td>
                 </tr>
             {% empty %}

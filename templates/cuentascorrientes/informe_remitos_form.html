@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h3>Informe de Remitos Entregados</h3>
+
+    <form method="get" action="{% url 'cuentascorrientes:informe_remitos_resultado' %}">
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Fecha Desde</label>
+                {{ form.fecha_desde }}
+            </div>
+            <div class="col-md-3">
+                <label>Fecha Hasta</label>
+                {{ form.fecha_hasta }}
+            </div>
+            <div class="col-md-4">
+                <label>Cliente</label>
+                {{ form.cliente }}
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    Buscar
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+

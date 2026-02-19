@@ -30,7 +30,7 @@ class Clientes(models.Model):
     telefono_celular       = models.CharField(max_length=10, null=True, blank=True)
     email                  = models.EmailField(blank=True, null=True) 
     tipo_documento         = models.ForeignKey('TiposDocumento', on_delete=models.PROTECT) 
-    cuit                   = models.BigIntegerField() 
+    cuit                   = models.BigIntegerField() # esta campo deberia llamarse nro de documento 
     tipo                   = models.ForeignKey('TiposCliente', on_delete=models.PROTECT) 
     sucursal               = models.ForeignKey('empresa.Sucursales', on_delete=models.PROTECT, blank=True, null=True)
     activo                 = models.BooleanField() 
@@ -90,7 +90,7 @@ class Remitos(models.Model):
     usuario        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     created        = models.DateTimeField(auto_now_add=True)
     #lista          = models. 
-    #estado         = models.
+    estado         = models.IntegerField(null=True, blank=True) # por defecto null, si tiene estado = 5 significa devuelto y hay una NC q apunta a este RM en la tablamovimientos.
     #condvta        = models. 
     
     def __str__(self):
@@ -223,6 +223,7 @@ class Movimientos(models.Model):
     importe_iva      = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
     importe_total    = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
     alicuota_iva     = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)    
+    comprob_asoc     = models.IntegerField(null=True, blank=True)
     updated          = models.DateTimeField(auto_now=True)
     created          = models.DateTimeField(auto_now_add=True)
     usuario          = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)

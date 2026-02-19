@@ -1,6 +1,6 @@
 from django.urls import path
 from django.views.generic import TemplateView
-from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk
+from .views import ListaPreciosCreateView, ListaPreciosListView, ListaPreciosUpdateView, AccionOk, AccionError
 from .views import ClientesCreateView, ClientesListView, ClientesUpdateView, AccionOk, CtaCteFormView
 from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pedido, listado_pedidos, listado_pedidos_form, guardar_pedido_edit
 from .views import EntregaMercaderiaEditDetFormView
@@ -8,7 +8,8 @@ from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes, 
 
 from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar, pedido_editar, tmp_editar, tmp_eliminar
 
-from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir, listaprecios_imprimir, ingresar_rc , ctacte_form, cc
+from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir, listaprecios_imprimir, ingresar_rc , ctacte_informe_form, cc
+from .views import nc_devolucion, informe_remitos_form,informe_remitos_resultado
 
 app_name="cuentascorrientes"
 
@@ -18,6 +19,7 @@ urlpatterns = [
     path('cargar/', ListaPreciosCreateView.as_view(), name='lista_precios_add'),
     path('ok/', TemplateView.as_view(template_name='ok.html'), name='lista_precios_ok'),
     path('accion_ok/<str:titulo>', AccionOk, name='accion_ok'),
+    path('accion_error/<str:titulo>', AccionError, name='accion_error'),
 
     path('clientes_list', ClientesListView.as_view(), name='clientes_list'),
     path('clientes_add/', ClientesCreateView.as_view(), name='clientes_add'),
@@ -69,9 +71,17 @@ urlpatterns = [
 
     path('informe/pedidos_entregados', informe_pedidos, name='informe_pedidos'),
 
-    path('informe/ctacte_form', ctacte_form, name='ctacte_form'),
+    path('informe/ctacte_form', ctacte_informe_form, name='ctacte_informe_form'),
     path('informe/cc', cc, name="cc"),
 
+    
 
+    # ==================================== devolucion de mercaderia devuelve completamente un rm ========================
+    path("nc_devolucion/<int:remito_id>", nc_devolucion, name="nc_devolucion"),
+
+
+    # ==================================== informe de RM entregados ========================
+    path('informes/remitos/', informe_remitos_form, name='informe_remitos_form'),
+    path('informes/remitos/resultado/', informe_remitos_resultado, name='informe_remitos_resultado'),
     ]
 
