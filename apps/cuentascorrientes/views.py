@@ -1075,8 +1075,8 @@ def nc_devolucion(request, remito_id):
             remito.estado=5
             remito.save()
 
-            messages.success(request, "Nota de Crédito generada correctamente.")
-            return #redirect("remitos_detail", pk=remito.pk)
+            #messages.success(request, "Nota de Crédito generada correctamente.")
+            success_url = reverse_lazy('cuentascorrientes:accion_ok', kwargs={'titulo':"Movimiento registrado correctamente"})
 
         return redirect("cuentascorrientes:listado_pedidos_entregados")
 
