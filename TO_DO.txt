@@ -9,7 +9,7 @@ LISTO  -> Al momento de imprimir el RM usar una sola hoja.
 LISTO  -> Lista de precios, cambiar precios de forma excepcional
 
 
-Cargar RC
+LISTO  -> Cargar RC
 
 
 LISTO -> Anular pedido entregado con NC
@@ -23,7 +23,7 @@ LISTO -> RM en una sola hoja cuando los items son pocos, asi salen dos RM en una
 Listado pendientes por clie para enviar por WA 
 
 
-Cuanto se le facturo al cliente en rango de fecha
+LISTO -> Cuanto se le facturo al cliente en rango de fecha LISTADO DE RM ENTREGADOS
 
 Aplicaciones entre RM y RC
 

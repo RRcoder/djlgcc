@@ -128,7 +128,7 @@ class AgregarMercaderiaForm(forms.Form):
     cantidad = forms.DecimalField() 
     item_id = forms.CharField(widget=forms.HiddenInput(),  label="")
 
-class CtacteForm(forms.Form):
+class CtacteInformeForm(forms.Form):
     fecha_desde = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         required=True,
@@ -139,6 +139,12 @@ class CtacteForm(forms.Form):
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control' }),
         required=True,
         label='Fecha Hasta'
+    )
+    
+    cliente = forms.ModelChoiceField(
+        queryset=Clientes.objects.all().order_by('nombre'),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=False
     )
 
     def clean(self):

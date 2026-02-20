@@ -23,6 +23,14 @@
         {{ form.fecha_hasta.errors }}
     </div>
     </div>
+    
+    <div class="row">
+    <div class="col-4">
+        {{ form.cliente.label_tag }}
+        {{ form.cliente }}
+        {{ form.cliente.errors }}
+    </div>
+    </div>
 
     {% if form.non_field_errors %}
         <div style="color:red;">

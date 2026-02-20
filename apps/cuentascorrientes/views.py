@@ -6,7 +6,7 @@ from django.urls import reverse_lazy, reverse
 from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet, Movimientos
 
 from apps.empresa.models import DatosUsuarios, Comprobantes, TiposComprobante
-from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm, EntregaMercaderiaEditDetForm, CtacteForm
+from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm, EntregaMercaderiaEditDetForm, CtacteInformeForm
 from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm, GuardarPedidoEditForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField, Count
@@ -930,12 +930,12 @@ def ctacte_informe_form(request):
     resultados = None
 
     if request.method == "POST":
-        form = CtacteForm(request.POST)
+        form = CtacteInformeForm(request.POST)
         if form.is_valid():
             fecha_desde = form.cleaned_data["fecha_desde"]
             fecha_hasta = form.cleaned_data["fecha_hasta"]
 
-            cliente_id=7
+            cliente_id=form.cleaned_data['cliente'].id
             lll=cuenta_corriente_cliente(cliente_id, fecha_desde, fecha_hasta)
             print("------------------------")
             print(lll)
@@ -949,7 +949,7 @@ def ctacte_informe_form(request):
             }
             return render(request, "cuentascorrientes/ctacte_informe_resultado.html", resultados)
     else:
-        form = CtacteForm()
+        form = CtacteInformeForm()
 
         context = {"form": form}
     return render(request, "cuentascorrientes/ctacte_informe_form.html", context)
@@ -1009,9 +1009,10 @@ def cuenta_corriente_cliente(cliente_id, fedesde, fehasta):
                     SELECT
                         m.cliente_id,
                         m.fecomp AS fecha,
-                        'RC' AS tipo,
+                        m.tipocomp_str AS tipo,
                         CONCAT(
-                            'RC ',
+                            m.tipocomp_str,
+                            ' ',
                             LPAD(m.sucucomp, 5, '0'),
                             '-',
                             LPAD(m.nrocomp, 8, '0')

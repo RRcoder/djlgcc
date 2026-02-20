@@ -12,6 +12,7 @@
                 <th>Cliente</th>
                 <th>Comprobante</th>
                 <th>Fecha Entrega</th>
+                <th></th>
                 <th class="text-end">Total</th>
                 <th></th>
             </tr>
@@ -26,6 +27,7 @@
                     <td>{{ r.cliente }}</td>
                     <td>{{ r.rm_asociado }}</td>
                     <td>{{ r.rm_asociado.fecha|date:'d/m/Y' }}</td>
+                    <td class="text-danger">{% if r.rm_asociado.estado == 5 %}Devuelto{% endif %}</td>
                     <td class="text-end">{{ r.total_importe }}</td>
                     <td>
                     <a href="{% url 'cuentascorrientes:rm_imprimir' remito_id=r.rm_asociado.id %}" target="blank" class="btn btn-sm btn-primary">Imprimir</a>
