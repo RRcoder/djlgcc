@@ -3,11 +3,11 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView
 from django.views.generic import ListView, UpdateView, FormView
 from django.urls import reverse_lazy, reverse
-from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet, Movimientos
+from .models import ListaPrecios, Clientes, Procesos, PedidosTmp, Remitos, RemitosDet, TiposDocumento, Estadosped, Pedidos, PedidosDet, Movimientos, PagoRemito
 
 from apps.empresa.models import DatosUsuarios, Comprobantes, TiposComprobante
 from .forms import ListaPreciosForm, ClientesForm, CtaCteForm, CtaCteBlockForm, EntregaMercaderiaForm, EntregaMercaderiaDetForm, EntregaMercaderiaEditDetForm, CtacteInformeForm
-from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm, GuardarPedidoEditForm
+from .forms import GuardarPedidoForm, ElegirClienteForm, IngresarComprobanteForm, InformePedidosForm, GuardarPedidoEditForm, InformeRemitosSaldosForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, ExpressionWrapper, DecimalField, Func, Sum, Max, Value, CharField, Count
 from django.db.models.functions import Round, Coalesce, Concat, Cast
@@ -19,11 +19,14 @@ from django.shortcuts import get_object_or_404
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
 
 
 from django.db import connection  #para consultas directas
 
 from datetime import date
+from decimal import Decimal
+import json
 
 #==================================================================================================
 class ListaPreciosListView(LoginRequiredMixin, ListView):
@@ -124,7 +127,6 @@ class CtaCteBlockFormView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('cuentascorrientes:clientes_list') 
 
     def form_valid(self, form):
-        from datetime import date
         print(form)
         self.object=form.save(commit=False) # crea un objeto del modelo con los datos del form sin guardar para q luego podamos modificarlo y guarda lo que querramos.
         self.object.estadoctacte_id=2
@@ -747,6 +749,16 @@ def tmp_editar(request):
 
 #==================================================================================================
 @transaction.atomic
+def tmp_editar_precio(request):
+    if request.method == 'POST':
+        tmp = get_object_or_404(PedidosTmp, id=request.POST['tmp_id'])
+        tmp.precio = request.POST['precio']
+        tmp.save()
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+#==================================================================================================
+@transaction.atomic
 def tmp_eliminar(request, id):
     tmp = get_object_or_404(PedidosTmp, id=id)
     tmp.delete()
@@ -1144,10 +1156,275 @@ def informe_remitos_resultado(request):
     return render(request, 'cuentascorrientes/informe_remitos_resultado.html', context)
 
 #==================================================================================================
+@login_required
+def aplicar_pagos(request):
+    clientes = Clientes.objects.filter(activo=True).order_by('nombre')
+    cliente_id = request.GET.get('cliente_id')
+    
+    remitos = []
+    pagos = []
+    remitos_list = []
+    pagos_list = []
+    remitos_json = '[]'
+    pagos_json = '[]'
+    cliente = None
+    
+    if cliente_id:
+        cliente = get_object_or_404(Clientes, pk=cliente_id)
+        
+        total_expr = ExpressionWrapper(
+            F('detalles__importe_unitario') * F('detalles__cantidad'),
+            output_field=DecimalField()
+        )
+        
+        remitos = Remitos.objects.filter(
+            cliente=cliente
+        ).annotate(
+            importe_total=Coalesce(Sum(total_expr), 0)
+        ).filter(
+            estado__isnull=True
+        ).exclude(
+            estado=5
+        )
+        
+        remitos_list = []
+        for remito in remitos:
+            saldo = float(remito.importe_total or 0) - float(remito.monto_pagado or 0)
+            if saldo > 0:
+                remitos_list.append({
+                    'id': remito.id,
+                    'numero': f"{remito.punto_de_venta:05d}-{remito.numero:08d}",
+                    'fecha': str(remito.fecha),
+                    'importe_total': float(remito.importe_total or 0),
+                    'monto_pagado': float(remito.monto_pagado or 0),
+                    'saldo_pendiente': saldo,
+                })
+        remitos_json = json.dumps(remitos_list)
+        
+        pagos = Movimientos.objects.filter(
+            cliente=cliente,
+            tipocomp_str='RC'
+        )
+        
+        pagos_list = []
+        for pago in pagos:
+            saldo = pago.saldo_disponible
+            if saldo > 0:
+                pagos_list.append({
+                    'id': pago.id,
+                    'numero': f"{pago.sucucomp:05d}-{pago.nrocomp:08d}",
+                    'fecha': str(pago.fecomp),
+                    'importe_total': float(pago.importe_total or 0),
+                    'total_aplicado': float(pago.total_aplicado or 0),
+                    'saldo_disponible': float(saldo),
+                })
+        pagos_json = json.dumps(pagos_list)
+    
+    context = {
+        'clientes': clientes,
+        'cliente_seleccionado': cliente,
+        'remitos': remitos_list,
+        'pagos': pagos_list,
+        'remitos_json': remitos_json,
+        'pagos_json': pagos_json,
+    }
+    
+    return render(request, 'cuentascorrientes/aplicar_pagos.html', context)
+
 #==================================================================================================
+@login_required
+@require_POST
+@transaction.atomic
+def guardar_aplicacion_pagos(request):
+    cliente_id = request.POST.get('cliente_id')
+    if not cliente_id:
+        messages.error(request, "Debe seleccionar un cliente")
+        return redirect('cuentascorrientes:aplicar_pagos')
+    
+    cliente = get_object_or_404(Clientes, pk=cliente_id)
+    
+    aplicaciones = request.POST.getlist('aplicaciones')
+    
+    if not aplicaciones:
+        messages.error(request, "Debe aplicar al menos un pago a un remito")
+        return redirect(f'{reverse("cuentascorrientes:aplicar_pagos")}?cliente_id={cliente_id}')
+    
+    errores = []
+    aplicaciones_guardadas = 0
+    
+    for app in aplicaciones:
+        parts = app.split('-')
+        if len(parts) != 3:
+            continue
+        
+        remito_id = parts[0]
+        pago_id = parts[1]
+        monto_str = parts[2]
+        
+        try:
+            remito = Remitos.objects.get(pk=remito_id, cliente=cliente)
+            pago = Movimientos.objects.get(pk=pago_id, cliente=cliente)
+            monto = Decimal(monto_str)
+            
+            if remito.estado == 5:
+                errores.append(f"Remito {remito} está devuelto, no se puede aplicar pago")
+                continue
+            
+            saldo_remito = remito.total - remito.monto_pagado
+            if monto > saldo_remito:
+                errores.append(f"El monto ${monto} excede el saldo pendiente del remito {remito}")
+                continue
+            
+            saldo_pago = pago.saldo_disponible
+            if monto > saldo_pago:
+                errores.append(f"El monto ${monto} excede el saldo disponible del recibo {pago}")
+                continue
+            
+            if monto <= 0:
+                errores.append(f"El monto debe ser mayor a cero")
+                continue
+            
+            PagoRemito.objects.create(
+                pago=pago,
+                remito=remito,
+                monto_aplicado=monto,
+                usuario=request.user
+            )
+            aplicaciones_guardadas += 1
+            
+        except Remitos.DoesNotExist:
+            errores.append(f"Remito {remito_id} no encontrado")
+        except Movimientos.DoesNotExist:
+            errores.append(f"Pago {pago_id} no encontrado")
+        except Exception as e:
+            errores.append(f"Error: {str(e)}")
+    
+    if errores:
+        for error in errores:
+            messages.error(request, error)
+    else:
+        messages.success(request, f"Se aplicaron {aplicaciones_guardadas} pagos correctamente")
+    
+    return redirect(f'{reverse("cuentascorrientes:aplicar_pagos")}?cliente_id={cliente_id}')
 
+#==================================================================================================
+@login_required
+def informe_remitos_saldos_form(request):
+    form = InformeRemitosSaldosForm()
+    return render(request, 'cuentascorrientes/informe_remitos_saldos_form.html', {'form': form})
 
+#==================================================================================================
+@login_required
+def informe_remitos_saldos_resultado(request):
+    form = InformeRemitosSaldosForm(request.GET or None)
 
+    remitos = []
+    recibos = []
+    cliente = None
 
+    if form.is_valid():
+        fecha_desde = form.cleaned_data['fecha_desde']
+        fecha_hasta = form.cleaned_data['fecha_hasta']
+        cliente = form.cleaned_data['cliente']
 
+        total_expr = ExpressionWrapper(
+            F('detalles__importe_unitario') * F('detalles__cantidad'),
+            output_field=DecimalField()
+        )
+
+        query_remitos = Remitos.objects.filter(
+            fecha__range=(fecha_desde, fecha_hasta)
+        ).annotate(
+            importe_total=Coalesce(Sum(total_expr), 0)
+        )
+
+        if cliente:
+            query_remitos = query_remitos.filter(cliente=cliente)
+
+        for remito in query_remitos:
+            monto_pagado = remito.monto_pagado
+            saldo = float(remito.importe_total or 0) - float(monto_pagado or 0)
+            if remito.estado == 5:
+                saldo = 0
+            tiene_pagos = PagoRemito.objects.filter(remito=remito).exists()
+            
+            nc_asociada = ""
+            if remito.estado == 5:
+                nc = Movimientos.objects.filter(
+                    cliente=remito.cliente,
+                    tipocomp_str='NC',
+                    comprob_asoc=remito.id
+                ).first()
+                if nc:
+                    nc_asociada = f"{nc.sucucomp:05d}-{nc.nrocomp:08d}"
+            
+            remitos.append({
+                'id': remito.id,
+                'numero': str(remito),
+                'fecha': remito.fecha,
+                'importe_total': remito.importe_total,
+                'monto_pagado': monto_pagado,
+                'saldo': saldo,
+                'tiene_pagos': tiene_pagos,
+                'estado': remito.estado,
+                'nc_asociada': nc_asociada,
+            })
+
+        query_recibos = Movimientos.objects.filter(
+            tipocomp_str='RC',
+            fecomp__range=(fecha_desde, fecha_hasta)
+        )
+
+        if cliente:
+            query_recibos = query_recibos.filter(cliente=cliente)
+
+        for recibo in query_recibos:
+            saldo_disponible = recibo.saldo_disponible
+            recibos.append({
+                'id': recibo.id,
+                'numero': f"{recibo.sucucomp:05d}-{recibo.nrocomp:08d}",
+                'fecha': recibo.fecomp,
+                'importe_total': recibo.importe_total,
+                'saldo_disponible': saldo_disponible,
+            })
+
+        total_saldo_remitos = sum(r['saldo'] for r in remitos)
+        total_saldo_recibos = sum(r['saldo_disponible'] for r in recibos)
+    else:
+        total_saldo_remitos = 0
+        total_saldo_recibos = 0
+
+    context = {
+        'form': form,
+        'remitos': remitos,
+        'recibos': recibos,
+        'total_saldo_remitos': total_saldo_remitos,
+        'total_saldo_recibos': total_saldo_recibos,
+        'cliente': cliente,
+    }
+
+    return render(request, 'cuentascorrientes/informe_remitos_saldos_resultado.html', context)
+
+#==================================================================================================
+@login_required
+def pagos_remito_json(request, remito_id):
+    remito = get_object_or_404(Remitos, pk=remito_id)
+    
+    pagos = PagoRemito.objects.filter(remito=remito).select_related('pago').order_by('fecha_aplicacion')
+    
+    pagos_list = []
+    for p in pagos:
+        pagos_list.append({
+            'numero': f"{p.pago.sucucomp:05d}-{p.pago.nrocomp:08d}",
+            'fecha': str(p.pago.fecomp),
+            'monto_aplicado': float(p.monto_aplicado),
+        })
+    
+    return JsonResponse({
+        'remito': str(remito),
+        'fecha': str(remito.fecha),
+        'pagos': pagos_list,
+    })
+
+#==================================================================================================
 

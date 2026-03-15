@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+
+<h1>Remitos entre fechas</h1>
+
+<form method="get" action="{% url 'cuentascorrientes:informe_remitos_saldos_resultado' %}">
+    
+    <div class="row">
+    <div class="col-4">
+        {{ form.fecha_desde.label_tag }}
+        {{ form.fecha_desde }}
+        {{ form.fecha_desde.errors }}
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="col-4">
+        {{ form.fecha_hasta.label_tag }}
+        {{ form.fecha_hasta }}
+        {{ form.fecha_hasta.errors }}
+    </div>
+    </div>
+    
+    <div class="row">
+    <div class="col-4">
+        {{ form.cliente.label_tag }}
+        {{ form.cliente }}
+        {{ form.cliente.errors }}
+    </div>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="color:red;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="row">
+    <div class="col-4">
+    <br>
+    <button type="submit" class="btn btn-primary">Consultar</button>
+    </div>
+    </div>
+</form>
+
+</div>
+{% endblock %}

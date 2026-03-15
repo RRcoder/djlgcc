@@ -14,7 +14,7 @@ LISTO  -> Cargar RC
 
 LISTO -> Anular pedido entregado con NC
 
-Permitir cambiar precio cuando se hace el RM
+LISTO -> Permitir cambiar precio cuando se hace el RM
 
 LISTO -> imprimir lista
 

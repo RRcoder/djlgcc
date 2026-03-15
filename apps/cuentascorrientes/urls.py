@@ -6,10 +6,11 @@ from .views import CtaCteBlockFormView, EntregaMercaderiaDetFormView, guardar_pe
 from .views import EntregaMercaderiaEditDetFormView
 from .views import listado_pedidos_pendientes_form, listado_pedidos_pendientes, informe_pedidos
 
-from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar, pedido_editar, tmp_editar, tmp_eliminar
+from .views import listado_pedidos_entregados, detalle_pedido, pedido_eliminar, pedido_editar, tmp_editar, tmp_editar_precio, tmp_eliminar
 
 from .views import ingresar_pagos_form, entregar_pedido, rm_imprimir, listaprecios_imprimir, ingresar_rc , ctacte_informe_form, cc
-from .views import nc_devolucion, informe_remitos_form,informe_remitos_resultado
+from .views import nc_devolucion, informe_remitos_form,informe_remitos_resultado, aplicar_pagos, guardar_aplicacion_pagos
+from .views import informe_remitos_saldos_form, informe_remitos_saldos_resultado, pagos_remito_json
 
 app_name="cuentascorrientes"
 
@@ -55,6 +56,7 @@ urlpatterns = [
 
 
     path('tmp/editar/', tmp_editar, name='tmp_editar'),
+    path('tmp/editar_precio/', tmp_editar_precio, name='tmp_editar_precio'),
     path('tmp/eliminar/<int:id>/', tmp_eliminar, name='tmp_eliminar'),
 
 
@@ -83,5 +85,12 @@ urlpatterns = [
     # ==================================== informe de RM entregados ========================
     path('informes/remitos/', informe_remitos_form, name='informe_remitos_form'),
     path('informes/remitos/resultado/', informe_remitos_resultado, name='informe_remitos_resultado'),
+
+    path('aplicar_pagos/', aplicar_pagos, name='aplicar_pagos'),
+    path('aplicar_pagos/guardar/', guardar_aplicacion_pagos, name='guardar_aplicacion_pagos'),
+
+    path('informes/remitos_saldos/', informe_remitos_saldos_form, name='informe_remitos_saldos_form'),
+    path('informes/remitos_saldos/resultado/', informe_remitos_saldos_resultado, name='informe_remitos_saldos_resultado'),
+    path('api/pagos_remito/<int:remito_id>/', pagos_remito_json, name='pagos_remito_json'),
     ]
 

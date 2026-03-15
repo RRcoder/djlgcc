@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+
+<h1>Remitos entre fechas</h1>
+
+<form method="get" action="{% url 'cuentascorrientes:informe_remitos_saldos_resultado' %}">
+    
+    <div class="row">
+    <div class="col-4">
+        {{ form.fecha_desde.label_tag }}
+        {{ form.fecha_desde }}
+        {{ form.fecha_desde.errors }}
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="col-4">
+        {{ form.fecha_hasta.label_tag }}
+        {{ form.fecha_hasta }}
+        {{ form.fecha_hasta.errors }}
+    </div>
+    </div>
+    
+    <div class="row">
+    <div class="col-4">
+        {{ form.cliente.label_tag }}
+        {{ form.cliente }}
+        {{ form.cliente.errors }}
+    </div>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div style="color:red;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="row">
+    <div class="col-4">
+    <br>
+    <button type="submit" class="btn btn-primary">Consultar</button>
+    </div>
+    </div>
+</form>
+
+{% if remitos or recibos %}
+<hr>
+<h2>Remitos</h2>
+
+{% if remitos %}
+<table class="table table-bordered table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Fecha</th>
+            <th>Remito</th>
+            <th class="text-end">Importe Total</th>
+            <th class="text-end">Pagado</th>
+            <th class="text-end">Saldo</th>
+            <th>Estado</th>
+            <th>NC Dev.</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in remitos %}
+            <tr>
+                <td>{{ r.fecha|date:"d/m/Y" }}</td>
+                <td>{{ r.numero }}</td>
+                <td class="text-end">${{ r.importe_total|floatformat:2 }}</td>
+                <td class="text-end">${{ r.monto_pagado|floatformat:2 }}</td>
+                <td class="text-end {% if r.saldo > 0 %}text-danger{% else %}text-success{% endif %}">
+                    ${{ r.saldo|floatformat:2 }}
+                </td>
+                <td>
+                    {% if r.estado == 5 %}
+                    <span class="badge bg-warning">Devuelto</span>
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>{{ r.nc_asociada|default:"-" }}</td>
+                <td>
+                    {% if r.tiene_pagos and r.estado != 5 %}
+                    <button type="button" class="btn btn-sm btn-info" onclick="verPagos({{ r.id }})">
+                        Ver Pagos
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        <tr class="table-secondary fw-bold">
+            <td colspan="4" class="text-end">Total Saldo:</td>
+            <td class="text-end">${{ total_saldo_remitos|floatformat:2 }}</td>
+            <td colspan="3"></td>
+        </tr>
+    </tbody>
+</table>
+{% else %}
+<p>No hay remitos en el período seleccionado.</p>
+{% endif %}
+
+{% if recibos %}
+<hr>
+<h2>Recibos</h2>
+<table class="table table-bordered table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Fecha</th>
+            <th>Recibo</th>
+            <th class="text-end">Importe Total</th>
+            <th class="text-end">Saldo Disponible</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for rec in recibos %}
+            <tr>
+                <td>{{ rec.fecha|date:"d/m/Y" }}</td>
+                <td>{{ rec.numero }}</td>
+                <td class="text-end">${{ rec.importe_total|floatformat:2 }}</td>
+                <td class="text-end {% if rec.saldo_disponible > 0 %}text-primary{% else %}text-muted{% endif %}">${{ rec.saldo_disponible|floatformat:2 }}</td>
+            </tr>
+        {% endfor %}
+        <tr class="table-secondary fw-bold">
+            <td colspan="3" class="text-end">Total Saldo:</td>
+            <td class="text-end">${{ total_saldo_recibos|floatformat:2 }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endif %}
+
+{% endif %}
+
+</div>
+
+<div class="modal fade" id="pagosModal" tabindex="-1" aria-labelledby="pagosModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pagosModalLabel">Pagos aplicados al Remito</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Remito:</strong> <span id="modalRemito"></span></p>
+        <p><strong>Fecha:</strong> <span id="modalFecha"></span></p>
+        <table class="table table-bordered table-sm" id="tablaPagos">
+            <thead class="table-dark">
+                <tr>
+                    <th>Recibo</th>
+                    <th>Fecha</th>
+                    <th class="text-end">Importe Aplicado</th>
+                </tr>
+            </thead>
+            <tbody id="tablaPagosBody">
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function verPagos(remitoId) {
+    fetch('{% url "cuentascorrientes:pagos_remito_json" 0 %}'.replace('0', remitoId))
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('modalRemito').textContent = data.remito;
+            document.getElementById('modalFecha').textContent = data.fecha;
+            
+            const tbody = document.getElementById('tablaPagosBody');
+            tbody.innerHTML = '';
+            
+            if (data.pagos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center">No hay pagos aplicados</td></tr>';
+            } else {
+                data.pagos.forEach(pago => {
+                    const row = `
+                        <tr>
+                            <td>${pago.numero}</td>
+                            <td>${pago.fecha}</td>
+                            <td class="text-end">$${pago.monto_aplicado.toFixed(2)}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('pagosModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar los pagos');
+        });
+}
+</script>
+
+{% endblock %}

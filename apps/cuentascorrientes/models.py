@@ -96,6 +96,35 @@ class Remitos(models.Model):
     def __str__(self):
         return "RTO {:05d}-{:08d}".format(self.punto_de_venta, self.numero)
 
+    @property
+    def total(self):
+        from django.db.models import Sum
+        resultado = self.detalles.aggregate(total=Sum(models.F('importe_unitario') * models.F('cantidad')))
+        return resultado['total'] or 0
+
+    @property
+    def monto_pagado(self):
+        from django.db.models import Sum
+        resultado = self.pagos_aplicados.aggregate(total=Sum('monto_aplicado'))
+        return resultado['total'] or 0
+
+    @property
+    def saldo_pendiente(self):
+        return self.total - self.monto_pagado
+
+    @property
+    def esta_cancelado(self):
+        return self.saldo_pendiente <= 0
+
+    @property
+    def esta_devuelto(self):
+        return self.estado == 5
+
+    @property
+    def puede_aplicar_pago(self):
+        return not self.esta_devuelto and not self.esta_cancelado
+
+
 class RemitosDet(models.Model):
     remito           = models.ForeignKey('Remitos', on_delete=models.PROTECT, related_name='detalles')
     codigo           = models.CharField(max_length=10, null=True, blank=True)
@@ -227,6 +256,31 @@ class Movimientos(models.Model):
     updated          = models.DateTimeField(auto_now=True)
     created          = models.DateTimeField(auto_now_add=True)
     usuario          = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True)
+
+    @property
+    def total_aplicado(self):
+        from django.db.models import Sum
+        resultado = self.remitos_aplicados.aggregate(total=Sum('monto_aplicado'))
+        return resultado['total'] or 0
+
+    @property
+    def saldo_disponible(self):
+        return (self.importe_total or 0) - self.total_aplicado
+
+    @property
+    def es_recibo(self):
+        return self.tipocomp_str == 'RC'
+
+
+class PagoRemito(models.Model):
+    pago = models.ForeignKey('Movimientos', on_delete=models.CASCADE, related_name='remitos_aplicados')
+    remito = models.ForeignKey('Remitos', on_delete=models.CASCADE, related_name='pagos_aplicados')
+    monto_aplicado = models.DecimalField(max_digits=12, decimal_places=2)
+    fecha_aplicacion = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f"Pago {self.pago_id} -> Remito {self.remito_id}: ${self.monto_aplicado}"
 
 
 class TiposDocumento(models.Model):

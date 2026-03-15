@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h2>Aplicar Pagos a Remitos</h2>
+
+    <form method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="cliente_id" class="form-label">Seleccionar Cliente:</label>
+                <select name="cliente_id" id="cliente_id" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Seleccione un cliente --</option>
+                    {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}" {% if cliente_seleccionado and cliente_seleccionado.id == cliente.id %}selected{% endif %}>
+                            ({{ cliente.id }}) {{ cliente.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    {% if cliente_seleccionado %}
+    <form method="post" action="{% url 'cuentascorrientes:guardar_aplicacion_pagos' %}">
+        {% csrf_token %}
+        <input type="hidden" name="cliente_id" value="{{ cliente_seleccionado.id }}">
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Remitos Pendientes</h4>
+                {% if remitos %}
+                <table class="table table-bordered table-sm">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Remito</th>
+                            <th>Fecha</th>
+                            <th>Importe Total</th>
+                            <th>Pagado</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Aplicar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for remito in remitos %}
+                        <tr>
+                            <td>{{ remito.numero }}</td>
+                            <td>{{ remito.fecha|date:"d/m/Y" }}</td>
+                            <td class="text-end">${{ remito.importe_total|floatformat:2 }}</td>
+                            <td class="text-end">${{ remito.monto_pagado|floatformat:2 }}</td>
+                            <td class="text-end text-success">${{ remito.saldo_pendiente|floatformat:2 }}</td>
+                            <td>
+                                <input type="number" 
+                                       class="form-control form-control-sm remito-input" 
+                                       name="monto_remito_{{ remito.id }}" 
+                                       step="0.01" 
+                                       min="0" 
+                                       max="{{ remito.saldo_pendiente|floatformat:2 }}"
+                                       data-remito-id="{{ remito.id }}"
+                                       data-saldo-pendiente="{{ remito.saldo_pendiente|floatformat:2 }}"
+                                       placeholder="0.00">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No hay remitos pendientes para este cliente.</p>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6">
+                <h4>Recibos Disponibles</h4>
+                {% if pagos %}
+                <table class="table table-bordered table-sm">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Recibo</th>
+                            <th>Fecha</th>
+                            <th>Importe Total</th>
+                            <th>Aplicado</th>
+                            <th>Saldo Disponible</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pago in pagos %}
+                        <tr>
+                            <td>{{ pago.numero }}</td>
+                            <td>{{ pago.fecha|date:"d/m/Y" }}</td>
+                            <td class="text-end">${{ pago.importe_total|floatformat:2 }}</td>
+                            <td class="text-end">${{ pago.total_aplicado|floatformat:2 }}</td>
+                            <td class="text-end text-primary">${{ pago.saldo_disponible|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No hay recibos disponibles para este cliente.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mt-4" id="aplicaciones-section" style="display: none;">
+            <div class="col-12">
+                <h4>Detalle de Aplicación</h4>
+                <table class="table table-bordered table-sm" id="aplicaciones-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Remito</th>
+                            <th>Saldo Pendiente</th>
+                            <th>Monto a Aplicar</th>
+                            <th>Recibo a Utilizar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="aplicaciones-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <button type="submit" class="btn btn-success" id="btn-guardar" disabled>
+                    Guardar Aplicación de Pagos
+                </button>
+                <a href="{% url 'cuentascorrientes:aplicar_pagos' %}{% if cliente_seleccionado %}?cliente_id={{ cliente_seleccionado.id }}{% endif %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </div>
+    </form>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const remitoInputs = document.querySelectorAll('.remito-input');
+        const btnGuardar = document.getElementById('btn-guardar');
+        const aplicacionesSection = document.getElementById('aplicaciones-section');
+        const aplicacionesTbody = document.getElementById('aplicaciones-tbody');
+        const pagos = {{ pagos_json|safe|default:'[]' }};
+
+        function verificarInputs() {
+            let hayValor = false;
+            aplicacionesTbody.innerHTML = '';
+            
+            remitoInputs.forEach(input => {
+                const valor = parseFloat(input.value) || 0;
+                if (valor > 0) {
+                    hayValor = true;
+                    const remitoId = input.dataset.remitoId;
+                    const saldoPendiente = parseFloat(input.dataset.saldoPendiente);
+                    const remitoNumero = input.closest('tr').querySelector('td:first-child').textContent;
+                    
+                    if (pagos.length > 0) {
+                        const primerPago = pagos[0];
+                        const row = `
+                            <tr>
+                                <td>${remitoNumero}</td>
+                                <td>$${saldoPendiente.toFixed(2)}</td>
+                                <td>
+                                    <input type="hidden" name="aplicaciones" value="${remitoId}-${primerPago.id}-${valor.toFixed(2)}">
+                                    $${valor.toFixed(2)}
+                                </td>
+                                <td>${primerPago.numero} (Saldo: $${primerPago.saldo_disponible.toFixed(2)})</td>
+                            </tr>
+                        `;
+                        aplicacionesTbody.innerHTML += row;
+                    }
+                }
+            });
+
+            btnGuardar.disabled = !hayValor;
+            aplicacionesSection.style.display = hayValor ? 'block' : 'none';
+        }
+
+        remitoInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const valor = parseFloat(this.value) || 0;
+                const max = parseFloat(this.dataset.saldoPendiente);
+                
+                if (valor > max) {
+                    this.value = max.toFixed(2);
+                }
+                verificarInputs();
+            });
+        });
+    });
+    </script>
+    {% endif %}
+</div>
+{% endblock %}

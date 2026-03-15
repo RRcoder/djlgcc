@@ -68,7 +68,8 @@
                     <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
                     </form>
                 </td>
-                <td>Acciones</td>
+                <td><button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#precioModal" data-id="{{ r.id }}" data-precio="{{ r.precio }}">
+                    Cambiar precio</button></td>
             </tr>
             {% endfor%}
 
@@ -141,6 +142,49 @@
   </div>
 </div>
 
+<div class="modal fade" id="precioModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="post" action="{% url 'cuentascorrientes:tmp_editar_precio' %}">
+        {% csrf_token %}
+
+        <div class="modal-header">
+          <h5 class="modal-title">Cambiar precio</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+
+          <input type="hidden" name="tmp_id" id="precio_tmp_id">
+
+          <div class="mb-3">
+            <label class="form-label">Precio Unitario</label>
+            <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                name="precio"
+                id="precio"
+                required
+            >
+          </div>
+
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
 
 <script>
 document.getElementById('editarModal')
@@ -153,6 +197,18 @@ document.getElementById('editarModal')
 
     document.getElementById('cantidad').value =
         button.getAttribute('data-cantidad')
+})
+
+document.getElementById('precioModal')
+  .addEventListener('show.bs.modal', function (event) {
+
+    const button = event.relatedTarget
+
+    document.getElementById('precio_tmp_id').value =
+        button.getAttribute('data-id')
+
+    document.getElementById('precio').value =
+        button.getAttribute('data-precio')
 })
 </script>
 
