@@ -92,5 +92,8 @@ urlpatterns = [
     path('informes/remitos_saldos/', informe_remitos_saldos_form, name='informe_remitos_saldos_form'),
     path('informes/remitos_saldos/resultado/', informe_remitos_saldos_resultado, name='informe_remitos_saldos_resultado'),
     path('api/pagos_remito/<int:remito_id>/', pagos_remito_json, name='pagos_remito_json'),
+
+
+
     ]
 

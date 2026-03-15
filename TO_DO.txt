@@ -25,6 +25,6 @@ Listado pendientes por clie para enviar por WA
 
 LISTO -> Cuanto se le facturo al cliente en rango de fecha LISTADO DE RM ENTREGADOS
 
-Aplicaciones entre RM y RC
+LISTO -> Aplicaciones entre RM y RC
 
 
